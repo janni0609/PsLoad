@@ -149,13 +149,6 @@ void setup()
   tft.fillScreen(TFT_BLACK);
 
 
-  //EEPROM.get(0, VoltDacOffsets);
-  //EEPROM.get(80, VoltAdcOffsets);
-
-  //EEPROM.get(160, AmpAdcOffsets);
-  //EEPROM.get(320, AmpDacNOffsets);
-  //EEPROM.get(400, AmpDacPOffsets);
-
   /*
 
   for (uint8_t n  = 0; n <= 9; n++){
@@ -358,9 +351,6 @@ void CalMode(){
     }
   }
 
-  //EEPROM.put(160, AmpAdcOffsets);
-  //EEPROM.put(320, AmpDacNOffsets);
-  //EEPROM.put(400, AmpDacPOffsets);
 
   //if (FanMetro.check())  FanContr();
   Serial.println("finish");
