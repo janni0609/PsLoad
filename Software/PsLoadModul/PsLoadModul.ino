@@ -13,11 +13,9 @@ DAC dac(PIN_PA5, PIN_PA7, PIN_PA4, PIN_PA1, PIN_PA3);
 
 #include <SparkFun_ADS1219.h>
 SfeADS1219ArdI2C myADC;
-int ADCReset = PIN_PC5;
-const int interruptPin = PIN_PC4;
+const uint8_t ADCReset = PIN_PC5;
+//const uint8_t interruptPin = PIN_PC4;
 
-bool interruptSeen = false;
-bool VoltAmp = 0;
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Timer Interrupt
 
@@ -43,15 +41,15 @@ volatile bool prozessStuff = 0;
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-int SenseSW = PIN_PC3;
-int ON = PIN_PC0;
-int OnPhoto = PIN_PC1;
+const uint8_t SenseSW = PIN_PC3;
+const uint8_t ON = PIN_PC0;
+const uint8_t OnPhoto = PIN_PC1;
 
-int DataOut1 = PIN_PB4;
-int DataOut2 = PIN_PB5;
+const uint8_t DataOut1 = PIN_PB4;
+const uint8_t DataOut2 = PIN_PB5;
 
-int DataIn1 = PIN_PB6;
-int DataIn2 = PIN_PB7;
+const uint8_t DataIn1 = PIN_PB6;
+const uint8_t DataIn2 = PIN_PB7;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Interpollation Cal
@@ -71,12 +69,12 @@ double AmpAdcOffsets[20];
   
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Temp
-int Temper1 = PIN_PC2;
-int Temper2 = PIN_PA2;
+const uint8_t Temper1 = PIN_PC2;
+const uint8_t Temper2 = PIN_PA2;
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Globals for Sending
   float Volts, Amps, Temp1, Temp2;
-  bool ReadSerial = 0;
+  volatile bool ReadSerial = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Eeprom
