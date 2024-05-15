@@ -74,8 +74,7 @@ Metro FanMetro = Metro(250);            // Instanciate a metro object and set th
 //Metro IoT = Metro(1000);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//Interpollation Cal
-#include "InterpolationLib.h"
+//Cal
 
 double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
 double VoltDacOffsets[] =    {0.0,    0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
@@ -630,7 +629,7 @@ void ModeSwISR(){
 }
 
 void SendDataToCh1(char prefix, float data){
-  //if (prefix == 'v') data += Interpolation::Linear(VoltSetPoints, VoltDacOffsets, 10, double(data), true);
+
 
   digitalWrite(DataOut1, HIGH);
   Serial1.print(prefix);
@@ -747,8 +746,6 @@ void GetDataCH1(void){
 
 void dipsData(){
   //digitalWrite(Debug, HIGH);
-  //VoltCH1 += Interpolation::Linear(VoltSetPoints, VoltAdcOffsets, 10, double(VoltCH1), true);
-  //AmpCH1 +=  Interpolation::Linear(AmpAdcSetPoints, AmpAdcOffsets, 20, double(AmpCH1), true);
   VoltCH1 = avgVoltCH1.reading(VoltCH1);          //mooving Average
   AmpCH1 = avgAmpCH1.reading(AmpCH1);             //mooving Average
 
