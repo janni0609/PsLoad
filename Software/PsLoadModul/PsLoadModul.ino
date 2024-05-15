@@ -45,8 +45,8 @@ const uint8_t SenseSW = PIN_PC3;
 const uint8_t ON = PIN_PC0;
 const uint8_t OnPhoto = PIN_PC1;
 
-const uint8_t DataOut1 = PIN_PB4;
-const uint8_t DataOut2 = PIN_PB5;
+const uint8_t DataOut1 = PIN_PB4;       //Send Data
+const uint8_t DataOut2 = PIN_PB5;       //Error flag
 
 const uint8_t DataIn1 = PIN_PB6;
 const uint8_t DataIn2 = PIN_PB7;
@@ -157,6 +157,11 @@ void setup()
   pinMode(DataIn2, INPUT);
   pinMode(DataIn1, INPUT);
   attachInterrupt(digitalPinToInterrupt(DataIn1),  ReadData, FALLING);
+
+  pinMode(DataOut1, OUTPUT);
+  pinMode(DataOut2, OUTPUT);
+  digitalWrite(DataOut1, HIGH);
+  digitalWrite(DataOut2, LOW);
   
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -407,12 +412,14 @@ void ReadTemps(void)
   if (maxTemp >= OTP && OTP_flag == 0){
     OTP_flag = 1;
     digitalWrite(OnPhoto, LOW);
-    delayMicroseconds(300);                            //mos turn off delay
+    delayMicroseconds(300);                           //mos turn off delay
     digitalWrite(ON, LOW);
+    digitalWrite(DataOut2, HIGH);                     //Raise Error Flag
   }else if (maxTemp < OTP && OTP_flag == 1){
     OTP_flag = 0;
+    digitalWrite(DataOut2, LOW);                      //Reset Error Flag
     //digitalWrite(OnPhoto, HIGH);
-    //delayMicroseconds(1200);                           //mos turn on delay
+    //delayMicroseconds(1200);                        //mos turn on delay
     //digitalWrite(ON, HIGH);
   }
 
