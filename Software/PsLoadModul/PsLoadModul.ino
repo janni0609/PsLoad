@@ -71,6 +71,9 @@ double AmpAdcOffsets[20];
 //Temp
 const uint8_t Temper1 = PIN_PC2;
 const uint8_t Temper2 = PIN_PA2;
+
+const uint8_t OTP = 60;           // Over temp Protection
+bool OTP_flag = 0;
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Globals for Sending
   float Volts, Amps, Temp1, Temp2;
@@ -210,6 +213,7 @@ void CheckSerialRx(void)
     if (first == 'v') {
       num = Serial.parseFloat();
       num += float(Interpolation::Linear(VoltSetPoints, VoltDacOffsets, 10, double(num), false));                     // cal
+      num = constrain(num, 0.0, 25.0);
       num = num * 2621.4;                               //input  0-25 output 0-65535
       dac.writeChannel(DAC_CHANNEL_A, uint16_t(num));
       //Serial.println(num);
@@ -217,6 +221,7 @@ void CheckSerialRx(void)
     if (first == 'i') {
       num = Serial.parseFloat();
       num += float(Interpolation::Linear(AmpSetPoints, AmpDacPOffsets, 10, double(num), false));                     // cal
+      num = constrain(num, 0.0, 5.0);
       num = num * 13107.0;                              //input  0-5 output 0-65535
       dac.writeChannel(DAC_CHANNEL_B, uint16_t(num));
       //Serial.println(num);
@@ -224,19 +229,20 @@ void CheckSerialRx(void)
     if (first == 's') {
       num = Serial.parseFloat();
       num += float(Interpolation::Linear(AmpSetPoints, AmpDacNOffsets, 10, double(num), false));                     // cal
+      num = constrain(num, 0.0, 5.0);
       num = num * 13107.0;                               //input  0-5 output 0-65535
       dac.writeChannel(DAC_CHANNEL_C, uint16_t(num));
       //Serial.println(num);
     }
     if (first == 'o') {                                  //on
       digitalWrite(OnPhoto, HIGH);
-      //delayMicroseconds(1200);                           //mos turn on delay
+      delayMicroseconds(1200);                           //mos turn on delay
       digitalWrite(ON, HIGH);
       //Serial.println("output ON");
     }
     if (first == 'f') {                                  //off
       digitalWrite(OnPhoto, LOW);
-      //delayMicroseconds(300);                            //mos turn off delay
+      delayMicroseconds(300);                            //mos turn off delay
       digitalWrite(ON, LOW);
       //Serial.println("output OFF");
     }
@@ -304,29 +310,6 @@ void CheckSerialRx(void)
   ReadSerial = 0;
 }
 
-void SetZero(){
-  VoltDacOffsets[0] = 0.0;
-  VoltDacOffsets[1] = 0.0;
-  VoltDacOffsets[2] = 0.0;
-  VoltDacOffsets[3] = 0.0;
-  VoltDacOffsets[4] = 0.0;
-  VoltDacOffsets[5] = 0.0;
-  VoltDacOffsets[6] = 0.0;
-  VoltDacOffsets[7] = 0.0;
-  VoltDacOffsets[8] = 0.0;
-  VoltDacOffsets[9] = 0.0;
-
-  VoltAdcOffsets[0] = 0.0;
-  VoltAdcOffsets[1] = 0.0;
-  VoltAdcOffsets[2] = 0.0;
-  VoltAdcOffsets[3] = 0.0;
-  VoltAdcOffsets[4] = 0.0;
-  VoltAdcOffsets[5] = 0.0;
-  VoltAdcOffsets[6] = 0.0;
-  VoltAdcOffsets[7] = 0.0;
-  VoltAdcOffsets[8] = 0.0;
-  VoltAdcOffsets[9] = 0.0;
-}
 
 void Zero(double * array, int size){
   for (uint8_t n = 0; n < size; n++){
@@ -344,18 +327,6 @@ void SendArray(char prefix, double array[]){
     digitalWrite(DataOut1,HIGH);
   }
   
-}
-
-float SumUp(float array[]){
-  float sum = 0.0;
-  for (uint8_t n = 0; n <= 9; n++){
-    sum += array[n];
-  }
-  digitalWrite(DataOut1,LOW);
-  Serial.print('v');
-  Serial.print(sum,9);
-  digitalWrite(DataOut1,HIGH);
-  return sum;
 }
 
 
@@ -420,14 +391,29 @@ void ReadTemps(void)
   tempsensor = tempsensor - 0.5;
   tempsensor = tempsensor/0.01;                 //convert to Celsius
   Temp1 = tempsensor;
-  //Serial.print("   Temp1: ");
-  //Serial.print(tempsensor);
+
 
   tempsensor = analogRead(Temper2);
   tempsensor = tempsensor * 0.0005;             //convert to volt
   tempsensor = tempsensor - 0.5;
   tempsensor = tempsensor/0.01;                 //convert to Celsius
   Temp2 = tempsensor;
-  //Serial.print("   Temp2: ");
-  //Serial.println(tempsensor);
+
+  float maxTemp;
+
+  if (Temp1 > Temp2) maxTemp = Temp1;
+  else maxTemp = Temp2;
+
+  if (maxTemp >= OTP && OTP_flag == 0){
+    OTP_flag = 1;
+    digitalWrite(OnPhoto, LOW);
+    delayMicroseconds(300);                            //mos turn off delay
+    digitalWrite(ON, LOW);
+  }else if (maxTemp < OTP && OTP_flag == 1){
+    OTP_flag = 0;
+    //digitalWrite(OnPhoto, HIGH);
+    //delayMicroseconds(1200);                           //mos turn on delay
+    //digitalWrite(ON, HIGH);
+  }
+
 }
