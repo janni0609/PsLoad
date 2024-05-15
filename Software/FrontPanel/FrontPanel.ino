@@ -6,16 +6,16 @@ TFT_eSPI tft = TFT_eSPI();
 
 float VoltCH1, AmpCH1, WattCH1, temp1, temp2;
 
-int DataIn1 = 5;
-int DataIn2 = 3;
-int DataOut1 = 4;
-int DataOut2 = 2;
+const uint8_t DataIn1 = 5;
+const uint8_t DataIn2 = 3;
+const uint8_t DataOut1 = 4;
+const uint8_t DataOut2 = 2;
 
-uint8_t InterrSW = 33;
+const uint8_t InterrSW = 33;
 
-int Debug = 39;
+const uint8_t Debug = 39;
 
-int Fan = 19;
+const uint8_t Fan = 19;
 
 bool Error = 0;
 
@@ -34,8 +34,6 @@ const uint8_t RotClk = 21;
 const uint8_t RotDt = 22;
 
 const uint8_t RotBtn = 13;
-
-int counter = 0;
 
 bool last_run = LOW;
 bool aState;
@@ -76,18 +74,15 @@ Metro FanMetro = Metro(250);            // Instanciate a metro object and set th
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Cal
 
-double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
+const double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
 double VoltDacOffsets[] =    {0.0,    0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
 double VoltAdcOffsets[] =    {0.0,    0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
 
 
-//double AmpAdcPOffsets[10];
-//double AmpAdcNOffsets[10];
-
-double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     0.0,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
+const double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     0.0,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
 double AmpAdcOffsets[20];
 
-double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
+const double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
 double AmpDacPOffsets[] =   {0.0,     0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
 double AmpDacNOffsets[] =   {0.0,     0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
 
@@ -665,7 +660,6 @@ void shaft_moved(){   //ISR
   if(last_run == LOW){
     if (digitalRead(RotDt) != aState)
     {
-      counter++;
       if(ChannelSet == 0){                      //Set Ch1
         if (SetType == 0){                      //Set Volts
           VsetCH1 = VsetCH1 +  factorSelV();
@@ -684,7 +678,6 @@ void shaft_moved(){   //ISR
 
 
     }else{
-      counter--;
       if(ChannelSet == 0){                      //Set Ch1
         if (SetType == 0){                      //Set Volts
           VsetCH1 = VsetCH1 -  factorSelV();
