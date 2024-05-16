@@ -188,9 +188,6 @@ void ReadData(void)     //ISR
 
 void loop()
 {
-
-  
-
   if (digitalRead(DataIn2) && prozessStuff == 1){
     if (ReadSerial == 1) CheckSerialRx();
     ReadADCs();
@@ -236,13 +233,13 @@ void CheckSerialRx(void)
     }
     if (first == 'o') {                                  //on
       digitalWrite(OnPhoto, HIGH);
-      delayMicroseconds(1200);                           //mos turn on delay
+      //delayMicroseconds(1200);                           //mos turn on delay
       digitalWrite(ON, HIGH);
       //Serial.println("output ON");
     }
     if (first == 'f') {                                  //off
       digitalWrite(OnPhoto, LOW);
-      delayMicroseconds(300);                            //mos turn off delay
+      //delayMicroseconds(300);                            //mos turn off delay
       digitalWrite(ON, LOW);
       //Serial.println("output OFF");
     }
@@ -405,9 +402,9 @@ void ReadTemps(void)
 
   if (maxTemp >= OTP && OTP_flag == 0){
     OTP_flag = 1;
-    digitalWrite(OnPhoto, LOW);
-    delayMicroseconds(300);                           //mos turn off delay
-    digitalWrite(ON, LOW);
+    //digitalWrite(OnPhoto, LOW);
+    //delayMicroseconds(300);                           //mos turn off delay
+    //digitalWrite(ON, LOW);
     digitalWrite(DataOut2, HIGH);                     //Raise Error Flag
   }else if (maxTemp < OTP && OTP_flag == 1){
     OTP_flag = 0;

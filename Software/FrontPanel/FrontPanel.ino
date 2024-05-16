@@ -442,6 +442,7 @@ void CalCurrent(){
   SendDataToCh1('i', 0.0);
   SendDataToCh1('v', 0.1);
 
+/*
   n = 0;
   while (n <= 9){                   //Cal Amp Sink
     tft.fillRect(0, 0, 320, 240, TFT_BLACK);
@@ -492,14 +493,14 @@ void CalCurrent(){
       }
     }
   }
-
+*/
   //I   Cal Coeff. CurrDacPos
   //O   Cal Coeff. CurrDacNeg
   //P   Cal Coeff. CurrAdc
 
   SendArray('I', AmpDacPOffsets, 10);
   SendArray('O', AmpDacNOffsets, 10);
-  SendArray('K', AmpAdcOffsets, 20);
+  SendArray('P', AmpAdcOffsets, 20);
 
 
   digitalWrite(DataOut1, HIGH);           //Store Cal Cost. in Module EEprom
@@ -601,9 +602,9 @@ void SendArray(char prefix, double array[], uint16_t size){
     Serial1.print(prefix);
     Serial1.print(n);
     Serial1.print(' ');
-    Serial1.print(array[n], 6);
+    Serial1.print(array[n], 7);
     digitalWrite(DataOut1, LOW);
-    delay(30);
+    //delay(30);
   }
   
 }
