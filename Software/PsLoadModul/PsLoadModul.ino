@@ -103,7 +103,7 @@ void setup()
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   //Serial
-  Serial.begin(1000000);
+  Serial.begin(1000000);                //th. max Bd 2500000
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Initialize the DAC
@@ -165,10 +165,6 @@ void setup()
   
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  
-  //EEPROM.put(100, VoltAdcOffsets);
-  //EEPROM.put(0, VoltDacOffsets);
   
   delay(10);
 
@@ -208,7 +204,6 @@ void loop()
     //delay(25);
   }
 }
-
 
 void CheckSerialRx(void)
 {
@@ -314,7 +309,6 @@ void CheckSerialRx(void)
   }
   ReadSerial = 0;
 }
-
 
 void Zero(double * array, int size){
   for (uint8_t n = 0; n < size; n++){
