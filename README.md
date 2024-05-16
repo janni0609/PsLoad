@@ -1,2 +1,2 @@
 # PsLoad
- Power Supply and DC Load
+ Power Supply and DC Load Project
