@@ -1,0 +1,15 @@
+						Module		Front
+
+finish Cal 					+		+
+
+OTP	send status to Front			+		+
+
+Check Rx on every cycle				+
+
+Fix DataLine for Send Enable			+		+
+
+Implement Buzzer						+
+
+Start Capacity Meas. (RTC)			+		(+)
+
+Clean Up Funct. for 2. Ch. (C++)				+
