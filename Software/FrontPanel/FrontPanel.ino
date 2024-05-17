@@ -197,7 +197,9 @@ V   meas. Voltage       (float)
 A   meas. Current       (float)
 n   meas. temp 1        (float)
 m   meas. temp 2        (float)
-
+E   Error               (uint8_t)
+    OverTemp        Set     1
+    OverTemp        Reset   0
 
 */
 

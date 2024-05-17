@@ -55,16 +55,16 @@ const uint8_t DataIn2 = PIN_PB7;
 //Interpollation Cal
 #include "InterpolationLib.h"
 
-double VoltSetPoints[10] =  {0.03f,  0.05f, 0.1f,  1.0f, 5.0f, 10.0f, 15.0f, 20.0f, 24.0f, 25.0f};
+const double VoltSetPoints[10] =  {0.03f,  0.05f, 0.1f,  1.0f, 5.0f, 10.0f, 15.0f, 20.0f, 24.0f, 25.0f};
 double VoltDacOffsets[10];
 double VoltAdcOffsets[10];
 
 
-double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
+const double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
 double AmpDacPOffsets[10];
 double AmpDacNOffsets[10];
 
-double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     0.0,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
+const double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     0.0,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
 double AmpAdcOffsets[20];
   
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -176,6 +176,38 @@ void setup()
   EEPROM.get(160, AmpAdcOffsets);
   //SetZero();
 }
+
+/*  Commands
+  Commands Send to module:
+
+  v   set Voltage         (float)
+  i   set Current Source  (float)
+  s   set Current Sink    (float)
+  o   Output on
+  f   Output off
+  h   Sense internal
+  u   Sense External
+  r   set Votage Raw Data (uint16_t)
+  X   set Volt Cal Coeff. to Zero
+  x   set Curr Cal Coeff. to Zero
+  L   Cal Coeff. VoltDac
+  K   Cal Coeff. VoltAdc
+  I   Cal Coeff. CurrDacPos
+  O   Cal Coeff. CurrDacNeg
+  P   Cal Coeff. CurrAdc
+
+
+  Commands Send to Front:
+
+  V   meas. Voltage       (float)
+  A   meas. Current       (float)
+  n   meas. temp 1        (float)
+  m   meas. temp 2        (float)
+  E   Error               (uint8_t)
+      OverTemp        Set     1
+      OverTemp        Reset   0
+
+*/
 
 void TimerHandler1()    //ISR
 {
@@ -325,7 +357,6 @@ void SendArray(char prefix, double array[]){
   }
   
 }
-
 
 void ReadADCs(void)
 {
