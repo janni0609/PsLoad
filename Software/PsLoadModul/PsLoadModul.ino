@@ -74,6 +74,7 @@ const uint8_t Temper2 = PIN_PA2;
 
 const uint8_t OTP = 60;           // Over temp Protection
 bool OTP_flag = 0;
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Globals for Sending
   float Volts, Amps, Temp1, Temp2;
