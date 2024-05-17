@@ -325,7 +325,7 @@ void LoopPSload(){
 }         //function
 
 
-void CalMode(){
+void CalMode(){   //Serial Parameter
   tft.fillRect(0, 0, 320, 240, TFT_BLACK);
 
   tft.setTextDatum(TL_DATUM);
@@ -360,7 +360,7 @@ void CalMode(){
 
 }
 
-void CalCurrent(){
+void CalCurrent(){   //Serial Parameter
 
   float CalAmp;
 
@@ -514,7 +514,7 @@ void CalCurrent(){
   
 }
 
-void CalVoltage(){
+void CalVoltage(){   //Serial Parameter
   float CalVolt;
 
   double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
@@ -596,7 +596,7 @@ void CalVoltage(){
   Serial.println("finish Volt Cal");
 }
 
-void SendArray(char prefix, double array[], uint16_t size){
+void SendArray(char prefix, double array[], uint16_t size){   //Serial Parameter
   
   //Serial1.print(prefix);
   for (uint8_t n = 0; n < size; n++){
@@ -616,7 +616,7 @@ void ModeSwISR(){
   mode = 1;
 }
 
-void SendDataToCh1(char prefix, float data){
+void SendDataToCh1(char prefix, float data){   //Serial Parameter
 
 
   digitalWrite(DataOut1, HIGH);
