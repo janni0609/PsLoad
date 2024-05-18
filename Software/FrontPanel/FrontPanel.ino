@@ -364,7 +364,7 @@ void CalCurrent(){   //Serial Parameter
 
   float CalAmp;
 
-  double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     0.0,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
+  double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     -0.0000001,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
   double AmpAdcOffsets[20];
 
   double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
@@ -398,7 +398,7 @@ void CalCurrent(){   //Serial Parameter
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.drawString("Meas A Surc. Ch1:", 0, 10, 4);
     tft.drawString("WAIT!", 0, 40, 4);
-    tft.drawFloat(AmpSetPoints[n], 3, 240, 10, 4);
+    tft.drawFloat(AmpSetPoints[n], 4, 240, 10, 4);
     SendDataToCh1('i', AmpSetPoints[n]);
     //Serial.println("Cal V1");
 
@@ -428,12 +428,14 @@ void CalCurrent(){   //Serial Parameter
         double keyreturn = checkKeys();
         if (keyreturn != -1.0){
           AmpDacPOffsets[n] = AmpSetPoints[n] - keyreturn;
-          AmpAdcOffsets[9-n] = (keyreturn - CalAmp);
+          AmpAdcOffsets[10+n] = keyreturn - CalAmp;
 
-          Serial.print("Offset DAC: ");
+          Serial.print("ADC Meas: ");
+          Serial.print(CalAmp, 4);
+          Serial.print("   Offset DAC: ");
           Serial.print(AmpDacPOffsets[n],6);
           Serial.print("  Offset ADC: ");
-          Serial.println(AmpAdcOffsets[9-n],6);
+          Serial.println(AmpAdcOffsets[10+n],6);
 
           n++;
         }
@@ -444,7 +446,7 @@ void CalCurrent(){   //Serial Parameter
   SendDataToCh1('i', 0.0);
   SendDataToCh1('v', 0.1);
 
-/*
+
   n = 0;
   while (n <= 9){                   //Cal Amp Sink
     tft.fillRect(0, 0, 320, 240, TFT_BLACK);
@@ -453,7 +455,7 @@ void CalCurrent(){   //Serial Parameter
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.drawString("Meas A Sink Ch1:", 0, 10, 4);
     tft.drawString("WAIT!", 0, 40, 4);
-    tft.drawFloat(AmpSetPoints[n], 3, 240, 10, 4);
+    tft.drawFloat(AmpSetPoints[n], 4, 240, 10, 4);
     SendDataToCh1('s', AmpSetPoints[n]);
     //Serial.println("Cal V1");
 
@@ -482,20 +484,22 @@ void CalCurrent(){   //Serial Parameter
 
         double keyreturn = checkKeys();
         if (keyreturn != -1.0){
-          AmpDacNOffsets[n] = -(AmpSetPoints[n] - keyreturn);
-          AmpAdcOffsets[n+10] = keyreturn + CalAmp;
+          AmpDacNOffsets[n] = AmpSetPoints[n] - keyreturn;
+          AmpAdcOffsets[9-n] = keyreturn - CalAmp;
 
-          Serial.print("Offset DAC: ");
+          Serial.print("ADC Meas: ");
+          Serial.print(CalAmp, 4);
+          Serial.print("   Offset DAC: ");
           Serial.print(AmpDacNOffsets[n],6);
           Serial.print("  Offset ADC: ");
-          Serial.println(AmpAdcOffsets[n+10],6);
+          Serial.println(AmpAdcOffsets[9-n],6);
 
           n++;
         }
       }
     }
   }
-*/
+
   //I   Cal Coeff. CurrDacPos
   //O   Cal Coeff. CurrDacNeg
   //P   Cal Coeff. CurrAdc
@@ -508,6 +512,8 @@ void CalCurrent(){   //Serial Parameter
   digitalWrite(DataOut1, HIGH);           //Store Cal Cost. in Module EEprom
   Serial1.print('S');
   digitalWrite(DataOut1, LOW);
+
+  Serial.println("Send save cmd");
 
   SendDataToCh1('i', 0.1);
   SendDataToCh1('s', 0.1);
@@ -606,9 +612,13 @@ void SendArray(char prefix, double array[], uint16_t size){   //Serial Parameter
     Serial1.print(' ');
     Serial1.print(array[n], 7);
     digitalWrite(DataOut1, LOW);
-    //delay(30);
+
+    Serial.print(array[n], 7);
+    Serial.print("__");
+
+    delay(40);
   }
-  
+  Serial.println("__");
 }
 
 void ModeSwISR(){
