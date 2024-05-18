@@ -105,8 +105,57 @@ byte colPins[COLS] = {35, 36, 37, 38, 34}; //connect to the column pinouts of th
 
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
+
+
+class PSLoad
+{
+private:
+  HardwareSerial* serialPort;
+  //uint8_t DataOut_1;
+public:
+  PSLoad();
+
+  PSLoad(HardwareSerial* serialPort)
+  {
+    this->serialPort = serialPort;
+    //this->DataOut_1 = DataOut_1;
+  }
+
+
+  void init()
+  {
+    serialPort->begin(115200);
+  }
+
+  void SendData(char prefix, float data)
+  {
+    //digitalWrite(DataOut_1, HIGH);
+    serialPort->print(prefix);
+    serialPort->print(data, 6);
+    serialPort->print('t');
+    //digitalWrite(DataOut_1, LOW);
+  }
+
+  void SendData(char data)
+  {
+    //digitalWrite(DataOut_1, HIGH);
+    serialPort->print(data);
+    //digitalWrite(DataOut_1, LOW);
+  }
+};
+
+PSLoad Test(&Serial2);
+
+
 void setup() 
 {
+  Test.init();
+  delay(100);
+
+  Test.SendData('A', 1.23456);
+  Test.SendData('l');
+
+
 
   //Encoder
   pinMode(RotClk, INPUT);
@@ -172,34 +221,34 @@ void setup()
 }
 
 /*
-Commands Send to module:
+  Commands Send to module:
 
-v   set Voltage         (float)
-i   set Current Source  (float)
-s   set Current Sink    (float)
-o   Output on
-f   Output off
-h   Sense internal
-u   Sense External
-r   set Votage Raw Data (uint16_t)
-X   set Volt Cal Coeff. to Zero
-x   set Curr Cal Coeff. to Zero
-L   Cal Coeff. VoltDac
-K   Cal Coeff. VoltAdc
-I   Cal Coeff. CurrDacPos
-O   Cal Coeff. CurrDacNeg
-P   Cal Coeff. CurrAdc
+  v   set Voltage         (float)
+  i   set Current Source  (float)
+  s   set Current Sink    (float)
+  o   Output on
+  f   Output off
+  h   Sense internal
+  u   Sense External
+  r   set Votage Raw Data (uint16_t)
+  X   set Volt Cal Coeff. to Zero
+  x   set Curr Cal Coeff. to Zero
+  L   Cal Coeff. VoltDac
+  K   Cal Coeff. VoltAdc
+  I   Cal Coeff. CurrDacPos
+  O   Cal Coeff. CurrDacNeg
+  P   Cal Coeff. CurrAdc
 
 
-Commands Send to Front:
+  Commands Send to Front:
 
-V   meas. Voltage       (float)
-A   meas. Current       (float)
-n   meas. temp 1        (float)
-m   meas. temp 2        (float)
-E   Error               (uint8_t)
-    OverTemp        Set     1
-    OverTemp        Reset   0
+  V   meas. Voltage       (float)
+  A   meas. Current       (float)
+  n   meas. temp 1        (float)
+  m   meas. temp 2        (float)
+  E   Error               (uint8_t)
+      OverTemp        Set     1
+      OverTemp        Reset   0
 
 */
 
@@ -323,7 +372,6 @@ void LoopPSload(){
     }
   }       //while loop
 }         //function
-
 
 void CalMode(){   //Serial Parameter
   tft.fillRect(0, 0, 320, 240, TFT_BLACK);
