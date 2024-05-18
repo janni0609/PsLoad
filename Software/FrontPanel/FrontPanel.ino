@@ -860,9 +860,10 @@ float checkKeys(){
   }else if (key =='E'){
     PwSetCH1 = !PwSetCH1;               //PowerToggle Ch1
     digitalWrite(DataOut1, HIGH);
-    if(PwSetCH1)Serial1.print("o");
-    if(!PwSetCH1)Serial1.print("f");
+    if (PwSetCH1) Serial1.print('o');
+    else Serial1.print('f');
     digitalWrite(DataOut1, LOW);
+    Serial.println("Power Toggle");
     return -1.0;
   }else if (key =='F'){
     PwSetCH2 = !PwSetCH2;               //PowerToggle Ch2

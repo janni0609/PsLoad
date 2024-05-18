@@ -208,21 +208,12 @@ void setup()
       OverTemp        Reset   0
 
 */
-
-void TimerHandler1()    //ISR
-{
-  prozessStuff = 1;
-}
-
-void ReadData(void)     //ISR
-{
-  ReadSerial = 1;
-}
-
 void loop()
 {
+  //if (ReadSerial == 1) CheckSerialRx();
+  CheckSerialRx();
+
   if (digitalRead(DataIn2) && prozessStuff == 1){
-    if (ReadSerial == 1) CheckSerialRx();
     ReadADCs();
     ReadTemps();
     SendData();
@@ -234,6 +225,8 @@ void loop()
     //delay(25);
   }
 }
+
+
 
 void CheckSerialRx(void)
 {
@@ -446,4 +439,14 @@ void ReadTemps(void)
     //digitalWrite(ON, HIGH);
   }
 
+}
+
+void TimerHandler1()    //ISR
+{
+  prozessStuff = 1;
+}
+
+void ReadData(void)     //ISR
+{
+  ReadSerial = 1;
 }
