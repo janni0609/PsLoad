@@ -2,9 +2,13 @@
 
 finish Cal 					+		+		#
 
+validate Cal (tweek)						+
+
+increas Bd rate					+		+
+
 OTP	send status to Front			+		+
 
-Check Rx on every cycle				+
+Check Rx on every cycle				+				#
 
 Fix DataLine for Send Enable			+		+
 
