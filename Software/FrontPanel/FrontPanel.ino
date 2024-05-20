@@ -273,7 +273,227 @@ void LoopPSload(){
 }         //function
 
 
-
+/*
+void CalMode(){   //Serial Parameter
+  tft.fillRect(0, 0, 320, 240, TFT_BLACK);
+  tft.setTextDatum(TL_DATUM);
+  tft.setTextPadding(200);
+  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+  tft.drawString("A: Calibrate Voltage", 0, 0, 4);
+  tft.drawString("B: Calibrate Current", 0, 30, 4);
+  tft.drawString("D: Exit", 0, 60, 4);
+  uint8_t n = 0;
+  while(mode == 1){
+    char key = keypad.getKey();
+    if (key == 'D'){
+      mode = 0;
+    }
+    else if (key == 'A'){            //Enter Volt Cal Mode
+      CalVoltage();
+      mode = 0;
+    }
+    else if (key == 'B'){             //Enter Curr Cal Mode
+      CalCurrent();
+      mode = 0;
+    }
+  }
+  //if (FanMetro.check())  FanContr();
+  Serial.println("finish");
+  //mode = 0;
+}
+void CalCurrent(){   //Serial Parameter
+  float CalAmp;
+  double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     -0.0000001,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
+  double AmpAdcOffsets[20];
+  double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
+  double AmpDacPOffsets[10];
+  double AmpDacNOffsets[10];
+  Serial.println("enter Cal Func");
+  digitalWrite(DataOut2, HIGH);
+  digitalWrite(DataOut1, HIGH);
+  Serial1.print("o");
+  digitalWrite(DataOut1, LOW);
+  
+  tft.fillRect(0, 0, 320, 240, TFT_BLACK);
+  digitalWrite(DataOut1, HIGH);
+  Serial1.print('x');
+  digitalWrite(DataOut1, LOW);
+  analogWrite(Fan, 255);
+  uint8_t n = 0;
+  while (n <= 9){                   //Cal Amp Source
+    tft.fillRect(0, 0, 320, 240, TFT_BLACK);
+    tft.setTextDatum(TL_DATUM);
+    tft.setTextPadding(200);
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+    tft.drawString("Meas A Surc. Ch1:", 0, 10, 4);
+    tft.drawString("WAIT!", 0, 40, 4);
+    tft.drawFloat(AmpSetPoints[n], 4, 240, 10, 4);
+    Ch1.SendData('i', AmpSetPoints[n]);
+    //Serial.println("Cal V1");
+    uint8_t AvgCounter = 0;
+    uint8_t Check_n = n;
+    while(Check_n == n){
+      //Serial.println("Ch1.DataReady: ");
+      //Serial.println(Ch1.DataReady);
+      if (Ch1.DataReady)   Ch1.GetData();
+      if (Ch1.DispData){
+        CalAmp = avgAmpCH1Cal.reading(Ch1.Amp);
+        Ch1.DispData = 0;
+        AvgCounter++;
+      }
+      if(AvgCounter >= 50){
+        if (AvgCounter == 50){
+          tft.setTextDatum(TL_DATUM);
+          tft.setTextPadding(200);
+          tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+          tft.drawString("Enter Value", 0, 40, 4);
+        }
+        AvgCounter = 200;
+        
+        double keyreturn = checkKeys();
+        if (keyreturn != -1.0){
+          AmpDacPOffsets[n] = AmpSetPoints[n] - keyreturn;
+          AmpAdcOffsets[10+n] = keyreturn - CalAmp;
+          Serial.print("ADC Meas: ");
+          Serial.print(CalAmp, 4);
+          Serial.print("   Offset DAC: ");
+          Serial.print(AmpDacPOffsets[n],6);
+          Serial.print("  Offset ADC: ");
+          Serial.println(AmpAdcOffsets[10+n],6);
+          n++;
+        }
+      }
+    }
+  }
+  Ch1.SendData('i', 0.0);
+  Ch1.SendData('v', 0.1);
+  n = 0;
+  while (n <= 9){                   //Cal Amp Sink
+    tft.fillRect(0, 0, 320, 240, TFT_BLACK);
+    tft.setTextDatum(TL_DATUM);
+    tft.setTextPadding(200);
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+    tft.drawString("Meas A Sink Ch1:", 0, 10, 4);
+    tft.drawString("WAIT!", 0, 40, 4);
+    tft.drawFloat(AmpSetPoints[n], 4, 240, 10, 4);
+    Ch1.SendData('s', AmpSetPoints[n]);
+    //Serial.println("Cal V1");
+    uint8_t AvgCounter = 0;
+    uint8_t Check_n = n;
+    while(Check_n == n){
+      //Serial.println("Ch1.DataReady: ");
+      //Serial.println(Ch1.DataReady);
+      if (Ch1.DataReady)   Ch1.GetData();
+      if (Ch1.DispData){
+        CalAmp = avgAmpCH1Cal.reading(Ch1.Amp);
+        Ch1.DispData = 0;
+        AvgCounter++;
+      }
+      if(AvgCounter >= 50){
+        if (AvgCounter == 50){
+          tft.setTextDatum(TL_DATUM);
+          tft.setTextPadding(200);
+          tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+          tft.drawString("Enter Value", 0, 40, 4);
+        }
+        AvgCounter = 200;
+        
+        double keyreturn = checkKeys();
+        if (keyreturn != -1.0){
+          AmpDacNOffsets[n] = AmpSetPoints[n] - keyreturn;
+          AmpAdcOffsets[9-n] = keyreturn - CalAmp;
+          Serial.print("ADC Meas: ");
+          Serial.print(CalAmp, 4);
+          Serial.print("   Offset DAC: ");
+          Serial.print(AmpDacNOffsets[n],6);
+          Serial.print("  Offset ADC: ");
+          Serial.println(AmpAdcOffsets[9-n],6);
+          n++;
+        }
+      }
+    }
+  }
+  //I   Cal Coeff. CurrDacPos
+  //O   Cal Coeff. CurrDacNeg
+  //P   Cal Coeff. CurrAdc
+  Ch1.SendArray('I', AmpDacPOffsets, 10);
+  Ch1.SendArray('O', AmpDacNOffsets, 10);
+  Ch1.SendArray('P', AmpAdcOffsets, 20);
+  digitalWrite(DataOut1, HIGH);           //Store Cal Cost. in Module EEprom
+  Serial1.print('S');
+  digitalWrite(DataOut1, LOW);
+  Serial.println("Send save cmd");
+  Ch1.SendData('i', 0.1);
+  Ch1.SendData('s', 0.1);
+  
+}
+void CalVoltage(){   //Serial Parameter
+  float CalVolt;
+  double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
+  double VoltDacOffsets[10];
+  double VoltAdcOffsets[10];
+  Serial.println("enter Cal Func");
+  digitalWrite(DataOut2, HIGH);
+  digitalWrite(DataOut1, HIGH);
+  Serial1.print("o");
+  digitalWrite(DataOut1, LOW);
+  
+  tft.fillRect(0, 0, 320, 240, TFT_BLACK);
+  digitalWrite(DataOut1, HIGH);
+  Serial1.print('X');
+  digitalWrite(DataOut1, LOW);
+  uint8_t n = 0;
+  while (n <= 9){
+    tft.fillRect(0, 0, 320, 240, TFT_BLACK);
+    tft.setTextDatum(TL_DATUM);
+    tft.setTextPadding(200);
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+    tft.drawString("Meas Volt Ch1:", 0, 10, 4);
+    tft.drawString("WAIT!", 0, 40, 4);
+    tft.drawFloat(VoltSetPoints[n], 3, 180, 10, 4);
+    Ch1.SendData('v', VoltSetPoints[n]);
+    //Serial.println("Cal V1");
+    uint8_t AvgCounter = 0;
+    uint8_t Check_n = n;
+    while(Check_n == n){
+      //Serial.println("Ch1.DataReady: ");
+      //Serial.println(Ch1.DataReady);
+      if (Ch1.DataReady)   Ch1.GetData();
+      if (Ch1.DispData){
+        CalVolt = avgVoltCalCH1.reading(Ch1.Volt);
+        Ch1.DispData = 0;
+        AvgCounter++;
+      }
+      if(AvgCounter >= 60){
+        if (AvgCounter == 60){
+          tft.setTextDatum(TL_DATUM);
+          tft.setTextPadding(200);
+          tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+          tft.drawString("Enter Value", 0, 40, 4);
+        }
+        AvgCounter = 200;
+        
+        double keyreturn = checkKeys();
+        if (keyreturn != -1.0){
+          VoltDacOffsets[n] = VoltSetPoints[n] - keyreturn;
+          VoltAdcOffsets[n] = keyreturn - CalVolt;
+          Serial.print("Offset DAC: ");
+          Serial.print(VoltDacOffsets[n],6);
+          Serial.print("  Offset ADC: ");
+          Serial.println(VoltAdcOffsets[n],6);
+          n++;
+        }
+      }
+    }
+  }
+  Ch1.SendArray('L', VoltDacOffsets, 10);
+  Ch1.SendArray('K', VoltAdcOffsets, 10);
+  digitalWrite(DataOut1, HIGH);           //Store Cal Cost. in Module EEprom
+  Serial1.print('S');
+  digitalWrite(DataOut1, LOW);
+  Serial.println("finish Volt Cal");
+}
+*/
 
 float factorSelV(void){
   if (factor == 0) return 0.001;
