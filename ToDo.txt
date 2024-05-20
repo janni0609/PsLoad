@@ -4,7 +4,7 @@ finish Cal 					+		+		#
 
 validate Cal (tweek)						+
 
-increas Bd rate					+		+
+increas Bd rate					+		+		#
 
 OTP	send status to Front			+		+
 
@@ -16,4 +16,4 @@ Implement Buzzer						+
 
 Start Capacity Meas. (RTC)			+		(+)
 
-Clean Up Funct. for 2. Ch. (C++)				+
+Clean Up Funct. for 2. Ch. (C++)				+		(#)
