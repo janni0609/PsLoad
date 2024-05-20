@@ -15,7 +15,9 @@ const uint8_t DataOut2 = 2;
 
 const uint8_t InterrSW = 33;
 
-const uint8_t Debug = 39;
+const uint8_t BuzzerPin = 39;
+
+const uint8_t Debug = 40;
 
 const uint8_t Fan = 19;
 
@@ -126,9 +128,24 @@ movingAvgFloat* avgTypeCh1[] = { &avgVoltCH1, &avgAmpCH1, &avgVoltCalCH1, &avgAm
 
 PSLoad Ch1(avgTypeCh1, &Serial1, DataOut1, DataOut2);
 
+//------------------------------------------------------------------------------------------------
+// Buzzer Timer
+#include <TimerThree.h>
+
+volatile uint32_t BzCount = 0;
+volatile uint32_t BzThr = 1000;
+
 
 void setup() 
 {
+
+  Timer3.initialize(1000);
+  Timer3.attachInterrupt(BuzzerISR); // blinkLED to run every 0.15 seconds
+  Timer3.stop();
+  Timer3.restart();
+  pinMode(Debug, BuzzerPin);
+  digitalWrite(BuzzerPin, LOW);
+
 
   Ch1.init();
 
@@ -148,6 +165,10 @@ void setup()
   analogWriteFrequency(Fan, 25000);
 
   pinMode(Debug, OUTPUT);
+
+  
+
+  
   pinMode(DataOut1, OUTPUT);
   pinMode(DataOut2, OUTPUT);
 
@@ -167,6 +188,21 @@ void setup()
 
   tft.fillScreen(TFT_BLACK);
 
+}
+
+void BuzzerISR(void){
+  if (BzCount == BzThr){
+    digitalWrite(BuzzerPin, LOW);
+    Timer3.stop();
+  }
+  BzCount++;
+}
+
+void Buzzer(uint32_t buzzMS){
+  BzCount = 0;
+  BzThr = buzzMS;
+  Timer3.restart();
+  digitalWrite(BuzzerPin, HIGH);
 }
 
 
