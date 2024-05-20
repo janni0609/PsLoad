@@ -1,6 +1,8 @@
-#include <movingAvgFloat.h>
+
 #include "SPI.h"
 #include "TFT_eSPI.h"
+
+
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -22,11 +24,8 @@ bool Error = 0;
 //bool DataReadyCh1 = 0;//
 //bool DispData = 0;//
 
-movingAvgFloat avgVoltCH1(10);
-movingAvgFloat avgAmpCH1(10);
 
-movingAvgFloat avgVoltCalCH1(50);
-movingAvgFloat avgAmpCH1Cal(50);
+
 
 //------------------------------------------------------------------------------------------------
 //Encoder
@@ -52,7 +51,6 @@ bool sendCurrN = 0;
 //float InsetCH1 = 1.0;//
 
 //bool PwSetCH1 = 0;//
-bool PwSetCH2 = 0;
 
 int8_t factor = 0;
 uint8_t SetType = 0;            // 0: Vset, 1: Ipset, 2:Inset
@@ -106,117 +104,27 @@ byte colPins[COLS] = {35, 36, 37, 38, 34}; //connect to the column pinouts of th
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 
+#include "PSLoad.h"
 
-class PSLoad
-{
-private:
-  HardwareSerial* serialPort;
-  uint8_t DataOut_1;
-public:
-
-  float Vset = 5.0;
-  float Ipset = 1.0;
-  float Inset = 1.0;
-  bool PwSet = 0;
-
-  bool DataReady = 0;
-  bool DispData = 0;
+#include <movingAvgFloat.h>
 
 
-  float Volt, Amp, Watt, temp1, temp2;
-
-  PSLoad();
-
-  PSLoad(HardwareSerial* serialPort, uint8_t DataOut_1)
-  {
-    this->serialPort = serialPort;
-    this->DataOut_1 = DataOut_1;
-  }
 
 
-  void init()
-  {
-    serialPort->begin(1000000);
-  }
 
-  void SendData(char prefix, float data)
-  {
-    digitalWrite(DataOut_1, HIGH);
-    serialPort->print(prefix);
-    serialPort->print(data, 6);
-    serialPort->print('t');
-    digitalWrite(DataOut_1, LOW);
-  }
+movingAvgFloat avgVoltCH1(10);
+movingAvgFloat avgAmpCH1(10);
 
-  void SendData(char data)
-  {
-    digitalWrite(DataOut_1, HIGH);
-    serialPort->print(data);
-    digitalWrite(DataOut_1, LOW);
-  }
+movingAvgFloat avgVoltCalCH1(50);
+movingAvgFloat avgAmpCH1Cal(50);
 
-  void GetData(void){
-    while (serialPort->available() > 0){
-      //Serial.println("Get Data");
-      char first = serialPort->read();
-      if (first == 'V'){
-        Volt = serialPort->parseFloat();
-      }
-      if (first == 'A'){
-        Amp = serialPort->parseFloat();
-      }
-      if (first == 'n'){
-        temp1 = serialPort->parseFloat();
-      }
-      if (first == 'm'){
-        temp2 = serialPort->parseFloat();
-      }
-      if (first == 'y'){
-        //for (uint8_t n = 0; n <= 9; n++){
-          Serial.println(serialPort->parseFloat(), 6);
-        //}
-        //Serial.println('#');
-      }
-      if (first == 'v'){
-        Serial.println(serialPort->parseFloat(),9);
-        Serial.println('#');
-      }else{
+movingAvgFloat* avgTypeCh1[] = { &avgVoltCH1, &avgAmpCH1, &avgVoltCalCH1, &avgAmpCH1Cal};
+//movingAvgFloat* avgTypeCh2[] = { &avgVoltCH2, &avgAmpCH2, &avgVoltCalCH2, &avgAmpCH2Cal};
 
-      }
-    }
-    DataReady = 0;
-    DispData = 1;
-
-  }
-
-  void dipsData(){
-    //digitalWrite(Debug, HIGH);
-    Volt = avgVoltCH1.reading(Volt);          //mooving Average
-    Amp = avgAmpCH1.reading(Amp);             //mooving Average
-
-    tft.setTextDatum(TR_DATUM);
-    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-
-    tft.setTextPadding(135);
-    tft.drawFloat(Volt, 5, 125, 30, 4);
-
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    tft.drawFloat(Amp, 5, 125, 60, 4);
-
-    Watt = Volt * Amp;
-    tft.setTextColor(TFT_SKYBLUE, TFT_BLACK);
-    tft.drawFloat(Watt, 5, 125, 90, 4);
-
-    //digitalWrite(Debug, LOW);
-    DispData = 0;
-  }
-
-
-};
 
 //PSLoad Test(&Serial2);
 
-PSLoad Ch1(&Serial1, DataOut1);
+PSLoad Ch1(avgTypeCh1, &Serial1, DataOut1, DataOut2);
 
 
 void setup() 
@@ -235,6 +143,7 @@ void setup()
   pinMode(RotClk, INPUT);
   pinMode(RotDt, INPUT);
   pinMode(RotBtn, INPUT_PULLUP);
+
   attachInterrupt(digitalPinToInterrupt(RotBtn),  RotBtnISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(RotClk),  shaft_moved, CHANGE);
   //------------------------------------------------------------------------------------------------
@@ -260,11 +169,13 @@ void setup()
   pinMode(DataIn1, INPUT);
   attachInterrupt(DataIn1, DataReadyCH1, RISING);
 
-  avgVoltCH1.begin();
-  avgAmpCH1.begin();
 
-  avgVoltCalCH1.begin();
-  avgAmpCH1Cal.begin();
+  //avgVoltCH1.begin();
+  //avgAmpCH1.begin();
+
+  //avgVoltCalCH1.begin();
+  // avgAmpCH1Cal.begin();
+
 
   tft.begin();
   tft.setRotation(1);
@@ -284,9 +195,6 @@ void setup()
   }
 
   */
-  
-
-  
 
 
   //Serial.println(sizeof(VoltDacOffsets));
@@ -326,77 +234,13 @@ void setup()
 
 */
 
-void initPSLoad(){
-  
-  tft.fillRect(0, 0, 320, 240, TFT_BLACK);
 
-  tft.fillRect(159, 0, 2, 240, TFT_RED);
-
-  tft.setTextPadding(0);
-  tft.setTextDatum(TL_DATUM);
-  tft.drawString("C", 35, 0, 2);
-  tft.drawString("C", 95, 0, 2);
-
-  //tft.setTextPadding(100);
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.drawChar('V', 135, 30, 4);
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.drawChar('A', 135, 60, 4);
-  tft.setTextColor(TFT_SKYBLUE, TFT_BLACK);
-  tft.drawChar('W', 135, 90, 4);
-
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.drawChar('V', 135, 150, 4);
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.drawChar('A', 135, 180, 4);
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.drawChar('A', 135, 210, 4);
-
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-
-  tft.drawString("Set", 0, 120, 4);
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-  tft.drawString("V", 0, 150, 4);
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.drawString("I+", 0, 180, 4);
-  tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.drawString("I-", 0, 210, 4);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-
-  /*
-  digitalWrite(DataOut1, HIGH);
-  if(PwSetCH1) Serial1.print("o");
-  if(!PwSetCH1) Serial1.print("f");
-  digitalWrite(DataOut1, LOW);
-  */
-
-  if(Ch1.PwSet) Ch1.SendData('o');
-  if(!Ch1.PwSet) Ch1.SendData('f');
-
-  tft.setTextPadding(100);
-
-  
-  Ch1.SendData('v', Ch1.Vset);
-  Ch1.SendData('i', Ch1.Ipset);
-  Ch1.SendData('s', Ch1.Inset);
-
-  /*
-  SendDataToCh1('v', VsetCH1);
-  SendDataToCh1('i', IpsetCH1);
-  SendDataToCh1('s', InsetCH1);
-  */
-
-  dispSetData();
-
-  Serial.println("Start");
-  digitalWrite(DataOut2, HIGH);
-}
 
 void LoopPSload(){
 
   Serial.println("enter PSLoad Func");
 
-  initPSLoad();
+  Ch1.initPSLoad();
 
   while (mode == 0){                  //PSLoad normal mode
     if (Ch1.DataReady)  Ch1.GetData();
@@ -404,18 +248,18 @@ void LoopPSload(){
 
 
     if (sendVolt) {
-      dispSetData();
+      Ch1.dispSetData();
       Ch1.SendData('v', Ch1.Vset);
       sendVolt = 0;
     }
     if (sendCurrP) {
-      dispSetData();
+      Ch1.dispSetData();
       Ch1.SendData('i', Ch1.Ipset);
       sendCurrP = 0;
     }
     if (sendCurrN) {
       Ch1.SendData('s', Ch1.Inset);
-      dispSetData();
+      Ch1.dispSetData();
       sendCurrN = 0;
     }
 
@@ -458,6 +302,7 @@ void LoopPSload(){
   }       //while loop
 }         //function
 
+/*
 void CalMode(){   //Serial Parameter
   tft.fillRect(0, 0, 320, 240, TFT_BLACK);
 
@@ -637,9 +482,9 @@ void CalCurrent(){   //Serial Parameter
   //O   Cal Coeff. CurrDacNeg
   //P   Cal Coeff. CurrAdc
 
-  SendArray('I', AmpDacPOffsets, 10);
-  SendArray('O', AmpDacNOffsets, 10);
-  SendArray('P', AmpAdcOffsets, 20);
+  Ch1.SendArray('I', AmpDacPOffsets, 10);
+  Ch1.SendArray('O', AmpDacNOffsets, 10);
+  Ch1.SendArray('P', AmpAdcOffsets, 20);
 
 
   digitalWrite(DataOut1, HIGH);           //Store Cal Cost. in Module EEprom
@@ -725,8 +570,8 @@ void CalVoltage(){   //Serial Parameter
       }
     }
   }
-  SendArray('L', VoltDacOffsets, 10);
-  SendArray('K', VoltAdcOffsets, 10);
+  Ch1.SendArray('L', VoltDacOffsets, 10);
+  Ch1.SendArray('K', VoltAdcOffsets, 10);
 
   digitalWrite(DataOut1, HIGH);           //Store Cal Cost. in Module EEprom
   Serial1.print('S');
@@ -734,7 +579,9 @@ void CalVoltage(){   //Serial Parameter
 
   Serial.println("finish Volt Cal");
 }
+*/
 
+/*
 void SendArray(char prefix, double array[], uint16_t size){   //Serial Parameter
   
   //Serial1.print(prefix);
@@ -753,11 +600,8 @@ void SendArray(char prefix, double array[], uint16_t size){   //Serial Parameter
   }
   Serial.println("__");
 }
+*/
 
-void ModeSwISR(){
-  //mode = !mode;
-  mode = 1;
-}
 
 /*
 void SendDataToCh1(char prefix, float data){   //Serial Parameter
@@ -771,9 +615,7 @@ void SendDataToCh1(char prefix, float data){   //Serial Parameter
 }
 */
 
-void RotBtnISR(){   //ISR
-  //sendData = 1;
-}
+
 
 float factorSelV(void){
   if (factor == 0) return 0.001;
@@ -838,9 +680,7 @@ void shaft_moved(){   //ISR
   }
 }
 
-void DataReadyCH1(void){  //ISR
-  Ch1.DataReady = 1;
-}
+
 
 /*
 void GetDataCH1(void){
@@ -902,6 +742,7 @@ void dipsData(){
 }
 */
 
+/*
 void dispSetData(){
   tft.setTextDatum(TR_DATUM);
   tft.setTextPadding(100);
@@ -914,6 +755,7 @@ void dispSetData(){
   //upDateUndLine = 1;
   underLine();
 }
+*/
 
 float checkKeys(){
 
@@ -941,13 +783,13 @@ float checkKeys(){
     factor++;
     factor = constrain(factor, 0, 4);
     //upDateUndLine = 1;
-    underLine();
+    Ch1.underLine();
     return -1.0;
   }else if (key =='G'){
     factor--;
     factor = constrain(factor, 0, 4);
     //upDateUndLine = 1;
-    underLine();
+    Ch1.underLine();
     return -1.0;
   }else if (key =='E'){
     Ch1.PwSet = !Ch1.PwSet;               //PowerToggle Ch1
@@ -956,17 +798,17 @@ float checkKeys(){
     Serial.println("Power Toggle");
     return -1.0;
   }else if (key =='F'){
-    PwSetCH2 = !PwSetCH2;               //PowerToggle Ch2
+                   //PowerToggle Ch2
     return -1.0;
   }else if (key =='J'){
     ChannelSet = 0;
     //upDateUndLine = 1;
-    underLine();
+    Ch1.underLine();
     return -1.0;
   }else if (key =='I'){
     ChannelSet = 1;
     //upDateUndLine = 1;
-    underLine();
+    Ch1.underLine();
     return -1.0;
   }else if (key =='K'){
     return -1.0;
@@ -981,21 +823,21 @@ float checkKeys(){
   }else if (key == 'A'){
     SetType = 0;                        //Set V
     //upDateUndLine = 1;
-    underLine();
+    Ch1.underLine();
     //Serial.println("A");
     return -1.0;
 
   }else if (key == 'B'){
     SetType = 1;                        //Set I+
     //upDateUndLine = 1;
-    underLine();
+    Ch1.underLine();
     //Serial.println("B");
     return -1.0;
 
   }else if (key == 'C'){
     SetType = 2;                        //Set I-
     //upDateUndLine = 1;
-    underLine();
+    Ch1.underLine();
     //Serial.println("C");
     return -1.0;
 
@@ -1042,6 +884,7 @@ float checkKeys(){
 
 }
 
+/*
 void underLine(){
   tft.fillRect(0, 172, 124, 4, TFT_BLACK);
   tft.fillRect(0, 202, 124, 4, TFT_BLACK);
@@ -1076,6 +919,7 @@ void underLine(){
   }
   //upDateUndLine = 0;
 }
+*/
 
 void FanContr(void){
   float maxTemp = Ch1.temp1;
@@ -1131,7 +975,19 @@ void processNumPad(float num){
 
 void loop() {
   if (mode == 0) LoopPSload();
-  if (mode == 1) CalMode();
+  //if (mode == 1) CalMode();
 
 }
 
+void ModeSwISR(){       //ISR
+  //mode = !mode;
+  mode = 1;
+}
+
+void DataReadyCH1(void){  //ISR
+  Ch1.DataReady = 1;
+}
+
+void RotBtnISR(){   //ISR
+  //sendData = 1;
+}
