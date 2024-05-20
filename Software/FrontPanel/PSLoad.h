@@ -48,13 +48,12 @@ public:
     avgAmp      = _Avgs[1];
     avgVoltCal  = _Avgs[2];
     avgAmpCal   = _Avgs[3];
-
   }
 
 
   void init()
   {
-    serialPort->begin(1000000);
+    serialPort->begin(2000000);
 
     avgVolt->begin();
     avgAmp->begin();
