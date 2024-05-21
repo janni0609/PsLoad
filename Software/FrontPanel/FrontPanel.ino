@@ -677,5 +677,5 @@ void RotBtnISR(){   //ISR
 }
 
 void ErrorCh1_ISR(void){
-  Buzzer(1000);
+  Buzzer(2000);
 }

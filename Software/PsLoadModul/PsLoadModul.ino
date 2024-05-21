@@ -478,9 +478,9 @@ void ReadTemps(void)
     OTP_flag = 0;
     digitalWrite(DataOut2, LOW);                      //Reset Error Flag
     
-    digitalWrite(OnPhoto, HIGH);
+    //digitalWrite(OnPhoto, HIGH);
     //delayMicroseconds(1200);                        //mos turn on delay
-    digitalWrite(ON, HIGH);
+    //digitalWrite(ON, HIGH);
   }
 
 }
