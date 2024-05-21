@@ -219,8 +219,8 @@ void LoopPSload(){
   Ch1.initPSLoad();
 
   while (mode == 0){                  //PSLoad normal mode
-    if (Ch1.DataReady)  Ch1.GetData();
-    if (Ch1.DispData)   Ch1.dipsData();
+    if (Ch1.DataReady)  Ch1.GetData();           // ~6 us
+    if (Ch1.DispData)   Ch1.dipsData();          //~5750 us
 
 
     if (sendVolt) {
@@ -239,7 +239,7 @@ void LoopPSload(){
       sendCurrN = 0;
     }
 
-    float keyreturn = checkKeys();
+    float keyreturn = checkKeys();                  //~ 1770 us  / or ~ 1 us
     if (keyreturn != -1.0) Serial.println(keyreturn, 4);
     processNumPad(keyreturn);
 
@@ -324,7 +324,7 @@ void shaft_moved(){   //ISR
   }
 }
 
-
+/*
 float checkKeys(){      //~ 1770 us
 
   const byte MAX_CHARS = 9;
@@ -451,6 +451,158 @@ float checkKeys(){      //~ 1770 us
 
     return -1.0;
   }
+}
+*/
+
+float checkKeys(){      //~ 1770 us  / or ~ 1 us
+  float Return = -1.0;
+
+  const byte MAX_CHARS = 9;
+  static char inputBuffer[MAX_CHARS];
+  static uint8_t inputIndex = 0;
+  static float floatTotal = 0;
+  static uint8_t intTotal;
+
+  char key = keypad.getKey();
+
+  //Serial.println(key, HEX);
+
+  //if (key != 0x00){
+  //  Serial.print("key:  ");
+  //  Serial.println(key);
+  //}
+
+  if (key == 0x00) return -1.0;
+  
+  switch (key){
+    case 'H':
+      factor++;
+      factor = constrain(factor, 0, 4);
+      //upDateUndLine = 1;
+      Ch1.underLine();
+      Return = -1.0;
+      break;
+
+    case 'G':
+      factor--;
+      factor = constrain(factor, 0, 4);
+      //upDateUndLine = 1;
+      Ch1.underLine();
+      Return = -1.0;
+      break;
+
+    case 'E':
+      Ch1.PwSet = !Ch1.PwSet;               //PowerToggle Ch1
+      if (Ch1.PwSet) Ch1.SendData('o');
+      else Ch1.SendData('f');
+      Serial.println("Power Toggle");
+      Return = -1.0;
+      break;
+
+    case 'F':
+      Return = -1.0;               //PowerToggle Ch2
+      break;
+
+    case 'J':
+      ChannelSet = 0;
+      //upDateUndLine = 1;
+      Ch1.underLine();
+      Return = -1.0;
+      break;
+
+    case 'I':
+      ChannelSet = 1;
+      //upDateUndLine = 1;
+      Ch1.underLine();
+      Return = -1.0;
+      break;
+
+    case 'K':
+      Return = -1.0;
+      break;
+
+    case 'L':
+      Ch1.SendData('Y');
+      Serial.println("Request Data");
+      Return = -1.0;
+      break;
+
+    case 'M':
+      // if (digitalRead(InterrSW) == 0) mode = 1;       // Enter Cal Function
+      // Serial.println("why: ");
+      Return = -1.0;
+      break;
+
+    case 'A':
+      SetType = 0;                        // Set V
+      // upDateUndLine = 1;
+      Ch1.underLine();
+      // Serial.println("A");
+      Return = -1.0;
+      break;
+
+    case 'B':
+      SetType = 1;                        // Set I+
+      // upDateUndLine = 1;
+      Ch1.underLine();
+      // Serial.println("B");
+      Return = -1.0;
+      break;
+
+    case 'C':
+      SetType = 2;                        // Set I-
+      // upDateUndLine = 1;
+      Ch1.underLine();
+      // Serial.println("C");
+      Return = -1.0;
+      break;
+
+    case 'D':
+      // Serial.println("D");
+      // SendDataToCh1('q', DAC1m);
+      // SendDataToCh1('w', DAC1b);
+      Return = -1.0;
+      break;
+
+    case '#': // user signal that entry has finished
+      // Serial.println();
+      // Serial.println("entry is complete");
+      floatTotal = atof(inputBuffer);  // convert buffer to a float
+      // Serial.println(floatTotal, 3);
+      // floatTotal = 0;
+      inputIndex = 0;
+
+      tft.setTextDatum(TR_DATUM);
+      tft.setTextPadding(112);
+      tft.setTextColor(TFT_WHITE, TFT_BLACK);
+      tft.drawString("", 150, 120, 4);
+
+      Return = floatTotal; // exit the function
+      break;
+
+    default:
+      if ((key >= '0' && key <= '9') || key == '.') { // only act on numeric or '.' keys
+        inputBuffer[inputIndex] = key;  // put the key value in the buffer
+        if (inputIndex != MAX_CHARS - 1) {
+          inputIndex++; // increment the array
+        }
+        inputBuffer[inputIndex] = '\0';  // terminate the string
+
+        tft.setTextDatum(TR_DATUM);
+        tft.setTextPadding(112);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK);
+        tft.drawString(inputBuffer, 150, 120, 4);
+        // Serial.print("inputBuffer:  ");
+        // Serial.println(inputBuffer);
+
+        Return = -1.0;
+      }
+      break;
+  }
+
+  
+
+  return Return;
 }
 
 void FanContr(void){

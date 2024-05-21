@@ -422,6 +422,7 @@ public:
     SendData('s', 0.1);
     
   }
+  
   void CalVoltage(){   //Serial Parameter
     float CalVolt;
     double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
