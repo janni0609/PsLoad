@@ -125,7 +125,6 @@ movingAvgFloat* avgTypeCh1[] = { &avgVoltCH1, &avgAmpCH1, &avgVoltCalCH1, &avgAm
 //movingAvgFloat* avgTypeCh2[] = { &avgVoltCH2, &avgAmpCH2, &avgVoltCalCH2, &avgAmpCH2Cal};
 
 
-//PSLoad Test(&Serial2);
 
 PSLoad Ch1(avgTypeCh1, &Serial1, DataOut1, DataOut2);
 
@@ -173,6 +172,8 @@ void setup()
   pinMode(DataOut1, OUTPUT);
   pinMode(DataOut2, OUTPUT);
 
+
+
   pinMode(InterrSW, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(InterrSW),  ModeSwISR, FALLING);
 
@@ -180,6 +181,7 @@ void setup()
   digitalWrite(DataOut2, LOW);
 
   pinMode(DataIn2, INPUT);
+  attachInterrupt(DataIn2, ErrorCh1_ISR, RISING);
 
   pinMode(DataIn1, INPUT);
   attachInterrupt(DataIn1, DataReadyCH1, RISING);
@@ -534,4 +536,8 @@ void DataReadyCH1(void){  //ISR
 
 void RotBtnISR(){   //ISR
   //sendData = 1;
+}
+
+void ErrorCh1_ISR(void){
+  Buzzer(1000);
 }

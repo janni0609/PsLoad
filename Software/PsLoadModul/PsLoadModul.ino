@@ -33,6 +33,10 @@ const uint8_t ADCReset = PIN_PC5;
   #error You must select one Timer  
 #endif
 
+
+
+
+
 #include "ATtiny_TimerInterrupt.h"
 
 //#define TIMER1_INTERVAL_MS        25L
@@ -79,6 +83,13 @@ bool OTP_flag = 0;
 //Globals for Sending
   float Volts, Amps, Temp1, Temp2;
   volatile bool ReadSerial = 0;
+
+  bool OpMode = 0;      // 0 : Normal Power Supply Mode ; 1 : Capcity Meas Mode
+
+  float AmpH, WattH;
+
+  uint32_t Time = 0;
+  uint32_t oldTime = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Eeprom
@@ -213,17 +224,31 @@ void loop()
   //if (ReadSerial == 1) CheckSerialRx();
   CheckSerialRx();
 
-  if (digitalRead(DataIn2) && prozessStuff == 1){
+  if (digitalRead(DataIn2) && prozessStuff == 1 && OpMode == 0){
     ReadADCs();
     ReadTemps();
     SendData();
     
-    //SendArray('y', VoltDacOffsets);
-    //delay(10);
-    //SumUp(VoltDacOffsets);
     prozessStuff = 0;
-    //delay(25);
   }
+  else if (digitalRead(DataIn2) && prozessStuff == 1 && OpMode == 1){
+    ReadADCs();
+    ReadTemps();
+    //SendData();
+
+
+
+    Time = millis();
+
+    uint32_t deltaTime = Time - oldTime;
+
+    AmpH =+ Amps * deltaTime * (1.0/3600000.0);
+    WattH =+ Watt * deltaTime * (1.0/3600000.0);
+
+    oldTime = Time;
+    
+    prozessStuff = 0;
+  })
 }
 
 
@@ -427,16 +452,18 @@ void ReadTemps(void)
 
   if (maxTemp >= OTP && OTP_flag == 0){
     OTP_flag = 1;
-    //digitalWrite(OnPhoto, LOW);
-    //delayMicroseconds(300);                           //mos turn off delay
-    //digitalWrite(ON, LOW);
+    digitalWrite(OnPhoto, LOW);
+    //delayMicroseconds(300);                         //mos turn off delay
+    digitalWrite(ON, LOW);
+
     digitalWrite(DataOut2, HIGH);                     //Raise Error Flag
   }else if (maxTemp < OTP && OTP_flag == 1){
     OTP_flag = 0;
     digitalWrite(DataOut2, LOW);                      //Reset Error Flag
-    //digitalWrite(OnPhoto, HIGH);
+    
+    digitalWrite(OnPhoto, HIGH);
     //delayMicroseconds(1200);                        //mos turn on delay
-    //digitalWrite(ON, HIGH);
+    digitalWrite(ON, HIGH);
   }
 
 }
