@@ -147,6 +147,7 @@ void setup()
   digitalWrite(BuzzerPin, LOW);
 
 
+
   Ch1.init();
 
   //Encoder
