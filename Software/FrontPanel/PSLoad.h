@@ -1,3 +1,4 @@
+#include "core_pins.h"
 #ifndef PSLoad_H
 #define PSLoad_H
 
@@ -96,7 +97,8 @@ public:
     Serial.println("__");
   }
 
-  void GetData(void){
+  void GetData(void){     // ~6 us
+    //myTime = micros();
     while (serialPort->available() > 0){
       //Serial.println("Get Data");
       char first = serialPort->read();
@@ -119,8 +121,8 @@ public:
         //Serial.println('#');
       }
       if (first == 'v'){
-        Serial.println(serialPort->parseFloat(),9);
-        Serial.println('#');
+        Serial.println(serialPort->parseInt());
+        //Serial.println('#');
       }else{
 
       }
@@ -128,9 +130,13 @@ public:
     DataReady = 0;
     DispData = 1;
 
+    //myTime = micros() - myTime;
+    //Serial.println(myTime);
   }
 
-  void dipsData(){
+  void dipsData(){        //~5750 us
+
+    //myTime = micros();
     //digitalWrite(Debug, HIGH);
     Volt = avgVolt->reading(Volt);          //mooving Average
     Amp = avgAmp->reading(Amp);             //mooving Average
@@ -150,6 +156,9 @@ public:
 
     //digitalWrite(Debug, LOW);
     DispData = 0;
+
+    //myTime = micros() - myTime;
+    //Serial.println(myTime);
   }
 
 

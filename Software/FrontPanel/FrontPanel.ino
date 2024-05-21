@@ -9,6 +9,8 @@ TFT_eSPI tft = TFT_eSPI();
 
 //float VoltCH1, AmpCH1, WattCH1, temp1, temp2;//
 
+uint32_t myTime;
+
 const uint8_t DataIn1 = 5;
 const uint8_t DataIn2 = 3;
 const uint8_t DataOut1 = 4;
@@ -255,24 +257,6 @@ void LoopPSload(){
     }
   */
 
-    
-    while (Serial.available() > 0){
-      //Serial.println("Start");
-      char firstChar = Serial.read();
-      if (firstChar == 'H'){
-        for (uint8_t n = 0; n <= 3; n++){
-          Serial.println(Serial.parseFloat());
-        }
-        Serial.println("Finish");
-      }
-      if (firstChar == 'L'){
-        uint8_t n = Serial.parseInt();
-        float flt = Serial.parseFloat();
-        Serial.print(n);
-        Serial.print(' ');
-        Serial.println(flt,6);
-      }
-    }
   }       //while loop
 }         //function
 
@@ -341,7 +325,7 @@ void shaft_moved(){   //ISR
 }
 
 
-float checkKeys(){
+float checkKeys(){      //~ 1770 us
 
   const byte MAX_CHARS = 9;
   static char inputBuffer[MAX_CHARS];
@@ -463,9 +447,10 @@ float checkKeys(){
     tft.drawString(inputBuffer, 150, 120, 4);
     //Serial.print("inputBuffer:  ");
     //Serial.println(inputBuffer);
+
+
     return -1.0;
   }
-
 }
 
 void FanContr(void){

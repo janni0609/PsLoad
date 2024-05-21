@@ -147,12 +147,10 @@ void setup()
 
   while (myADC.begin() == false)
   {
-    Serial.println("ADC failed to begin. Please check your wiring! Retrying...");
-    delay(1000);
   }
   delay(10);
   myADC.setVoltageReference(ADS1219_VREF_EXTERNAL);
-  myADC.setDataRate(ADS1219_DATA_RATE_90SPS);
+  myADC.setDataRate(ADS1219_DATA_RATE_330SPS);
   myADC.setConversionMode(ADS1219_CONVERSION_SINGLE_SHOT);
   
   Serial.println("ADC Setup");
@@ -225,12 +223,19 @@ void loop()
   CheckSerialRx();
 
   if (digitalRead(DataIn2) && prozessStuff == 1 && OpMode == 0){
+    //myTime = millis();
+
     ReadADCs();
     ReadTemps();
-    SendData();
-    
+    SendData();                 //takes 9 ms
+
+    //myTime = millis() - myTime;
+    //SendDebug(myTime);
+
     prozessStuff = 0;
   }
+
+
   else if (digitalRead(DataIn2) && prozessStuff == 1 && OpMode == 1){
     ReadADCs();
     ReadTemps();
@@ -243,18 +248,19 @@ void loop()
     uint32_t deltaTime = Time - oldTime;
 
     AmpH =+ Amps * deltaTime * (1.0/3600000.0);
-    WattH =+ Watt * deltaTime * (1.0/3600000.0);
+    //WattH =+ Watts * deltaTime * (1.0/3600000.0);
 
     oldTime = Time;
     
     prozessStuff = 0;
-  })
+  }
 }
 
 
 
 void CheckSerialRx(void)
 {
+  
   while (Serial.available() > 0) {
     float num = 0.0;
     char first = Serial.read();
@@ -356,6 +362,7 @@ void CheckSerialRx(void)
     }
   }
   ReadSerial = 0;
+  
 }
 
 void Zero(double * array, int size){
@@ -376,15 +383,25 @@ void SendArray(char prefix, double array[]){
   
 }
 
+void SendDebug(uint32_t data){
+  digitalWrite(DataOut1,LOW);
+  Serial.println("v");
+  Serial.print(data);
+  Serial.println("l");
+  digitalWrite(DataOut1,HIGH);
+}
+
 void ReadADCs(void)
 {
+
   myADC.setInputMultiplexer(ADS1219_CONFIG_MUX_DIFF_P0_N1);
   if (myADC.startSync()) // Start a single-shot conversion. This will return true on success.
   {
     while (myADC.dataReady() == false) // Check if the conversion is complete. This will return true if data is ready.
     {
-      delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
+      //delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
     }
+    
 
     myADC.readConversion(); // Read the conversion result from the ADC. Store it internally.
     float ADCreading = myADC.getConversionMillivolts(2500.0); // Convert to millivolts.
@@ -402,7 +419,7 @@ void ReadADCs(void)
   {
     while (myADC.dataReady() == false) // Check if the conversion is complete. This will return true if data is ready.
     {
-      delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
+      //delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
     }
 
     myADC.readConversion(); // Read the conversion result from the ADC. Store it internally.
@@ -412,7 +429,7 @@ void ReadADCs(void)
     Volts = Volts;
     //Serial.print("   Volt: ");
     //Serial.print(milliVolts / 100.0, 6);
-  }
+  } 
 }
 
 void SendData(void)
