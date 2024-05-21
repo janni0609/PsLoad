@@ -9,3 +9,5 @@ Fix DataLine for Send Enable			+		+
 Start Capacity Meas. (RTC)			+		(+)
 
 Clean Up Funct. for 2. Ch. (C++)				+		(#)
+
+Measure cycle Time				+
