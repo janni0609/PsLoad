@@ -145,7 +145,6 @@ void setup()
 
   // Set all outputs to 1V
   dac.writeChannel(DAC_CHANNEL_ALL, 0);
-  Serial.println("DAC Setup");
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   //ADC
@@ -167,7 +166,6 @@ void setup()
   myADC.setDataRate(ADS1219_DATA_RATE_330SPS);
   myADC.setConversionMode(ADS1219_CONVERSION_SINGLE_SHOT);
   
-  Serial.println("ADC Setup");
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   pinMode(SenseSW, OUTPUT);
   digitalWrite(SenseSW, LOW);
