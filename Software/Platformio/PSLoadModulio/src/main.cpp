@@ -1,5 +1,8 @@
 #include <Arduino.h>
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// func. proto.
+
 void CheckSerialRx();
 void Zero(double * array, int size);
 void SendArray(char prefix, double array[]);
@@ -10,10 +13,6 @@ void ReadTemps();
 void SendData();
 void ReadADCs();
 double Linear(double xValues[], double yValues[], int numValues, double pointX, bool trim);
-
-
-
-unsigned long myTime;
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -46,9 +45,6 @@ const uint8_t ADCReset = PIN_PC5;
 #else
   #error You must select one Timer  
 #endif
-
-
-
 
 
 #include "ATtiny_TimerInterrupt.h"
@@ -104,6 +100,8 @@ bool OTP_flag = 0;
 
   uint32_t Time = 0;
   uint32_t oldTime = 0;
+  
+  uint32_t myTime;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Eeprom
@@ -153,6 +151,8 @@ void setup()
   //ADC
   pinMode(ADCReset, OUTPUT);
   digitalWrite(ADCReset, HIGH);
+
+  pinMode(PIN_PC4, INPUT);
 
   Wire.begin();
   Wire.setClock(400000);
@@ -240,9 +240,9 @@ void loop()
   if (digitalRead(DataIn2) && prozessStuff == 1 && OpMode == 0){
     //myTime = millis();
 
-    ReadADCs();
-    ReadTemps();
-    SendData();                 //takes 9 ms
+    ReadADCs();                 //
+    ReadTemps();                //
+    SendData();                 //all takes 9 ms
 
     //myTime = millis() - myTime;
     //SendDebug(myTime);
