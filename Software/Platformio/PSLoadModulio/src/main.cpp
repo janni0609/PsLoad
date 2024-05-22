@@ -155,14 +155,14 @@ void setup()
   pinMode(PIN_PC4, INPUT);
 
   Wire.begin();
-  Wire.setClock(400000);
-  delay(10);
+  Wire.setClock(1000000);
+  delay(1);
   
 
   while (myADC.begin() == false)
   {
   }
-  delay(10);
+  delay(1);
   myADC.setVoltageReference(ADS1219_VREF_EXTERNAL);
   myADC.setDataRate(ADS1219_DATA_RATE_330SPS);
   myADC.setConversionMode(ADS1219_CONVERSION_SINGLE_SHOT);
@@ -190,7 +190,7 @@ void setup()
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
-  delay(10);
+  delay(1);
 
   EEPROM.get(0, VoltDacOffsets);
   EEPROM.get(40, VoltAdcOffsets);
