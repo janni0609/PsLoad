@@ -210,6 +210,8 @@ public:
     if(!PwSet) SendData('f');
 
     tft.setTextPadding(100);
+
+    delay(100);
     
     SendData('v', Vset);
     SendData('i', Ipset);
