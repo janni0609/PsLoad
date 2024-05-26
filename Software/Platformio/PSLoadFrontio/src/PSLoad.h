@@ -134,7 +134,7 @@ public:
     //Serial.println(myTime);
   }
 
-  void dipsData(){        //~5750 us
+  void dipsData(){        //~4403 us
 
     //myTime = micros();
     //digitalWrite(Debug, HIGH);
@@ -161,17 +161,56 @@ public:
     //Serial.println(myTime);
   }
 
+  void SpriteDipsData(){        //~6500 us !!!
+
+    //myTime = micros();
+    //digitalWrite(Debug, HIGH);
+
+    Volt = avgVolt->reading(Volt);          //mooving Average
+    Amp = avgAmp->reading(Amp);             //mooving Average
+
+    SprCh1.setTextDatum(TR_DATUM);
+    SprCh1.setTextColor(TFT_ORANGE, TFT_BLACK);
+
+    SprCh1.setTextPadding(135);
+    SprCh1.drawFloat(Volt, 5, 125, 0, 4);
+
+    SprCh1.setTextColor(TFT_YELLOW, TFT_BLACK);
+    SprCh1.drawFloat(Amp, 5, 125, 30, 4);
+
+    Watt = Volt * Amp;
+    SprCh1.setTextColor(TFT_SKYBLUE, TFT_BLACK);
+    SprCh1.drawFloat(Watt, 5, 125, 60, 4);
+
+    
+    SprCh1.pushSprite(0, 30);
+
+    //digitalWrite(Debug, LOW);
+    DispData = 0;
+
+    //myTime = micros() - myTime;
+    //Serial.println(myTime);
+  }
+  
+
 
   void initPSLoad(){
     
     tft.fillRect(0, 0, 320, 240, TFT_BLACK);
 
-    tft.fillRect(159, 0, 2, 240, TFT_RED);
+    tft.fillRect(159, 20, 2, 240, TFT_RED);
+    tft.drawFastHLine(60, 20, 200, TFT_RED);
+    tft.drawFastVLine(60, 0, 20, TFT_RED);
+    tft.drawFastVLine(260, 0, 20, TFT_RED);
 
     tft.setTextPadding(0);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.setTextDatum(TL_DATUM);
-    tft.drawString("C", 35, 0, 2);
-    tft.drawString("C", 95, 0, 2);
+    tft.drawChar('C', 97, 0, 2);
+    tft.drawChar('%', 175, 0, 2);
+    tft.drawString("Fan:", 115, 0, 2);
+
+    tft.drawString("Ch.1", 0, 0, 4);
 
     //tft.setTextPadding(100);
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
@@ -199,13 +238,6 @@ public:
     tft.drawString("I-", 0, 210, 4);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
-    /*
-    digitalWrite(DataOut1, HIGH);
-    if(PwSetCH1) Serial1.print("o");
-    if(!PwSetCH1) Serial1.print("f");
-    digitalWrite(DataOut1, LOW);
-    */
-
     if(PwSet) SendData('o');
     if(!PwSet) SendData('f');
 
@@ -216,12 +248,6 @@ public:
     SendData('v', Vset);
     SendData('i', Ipset);
     SendData('s', Inset);
-
-    /*
-    SendDataToCh1('v', VsetCH1);
-    SendDataToCh1('i', IpsetCH1);
-    SendDataToCh1('s', InsetCH1);
-    */
 
     dispSetData();
 

@@ -18,10 +18,19 @@ void BuzzerISR(void);
 #include "SPI.h"
 #include "TFT_eSPI.h"
 
+TFT_eSPI tft = TFT_eSPI();
+
+TFT_eSprite SprCh1 = TFT_eSprite(&tft);
+
+
+#include <InternalTemperature.h>
+
+
+
 float checkKeys();
 void Buzzer(uint32_t buzzMS);
 
-TFT_eSPI tft = TFT_eSPI();
+
 
 //float VoltCH1, AmpCH1, WattCH1, temp1, temp2;//
 
@@ -154,6 +163,8 @@ volatile uint32_t BzThr = 1000;
 void setup() 
 {
 
+
+
   Timer3.initialize(1000);
   Timer3.attachInterrupt(BuzzerISR); // blinkLED to run every 0.15 seconds
   Timer3.stop();
@@ -202,12 +213,21 @@ void setup()
   pinMode(DataIn1, INPUT);
   attachInterrupt(DataIn1, DataReadyCH1, RISING);
 
+  
+  //------------------------------------------------------------------------------------------------
+  // TFT
   tft.begin();
   tft.setRotation(1);
-
   tft.fillScreen(TFT_BLACK);
 
+  SprCh1.setColorDepth(16);
+  SprCh1.createSprite(125, 85);
+  SprCh1.fillSprite(TFT_BLACK);
+  //SprCh1.pushSprite(0,0);
+
+  //------------------------------------------------------------------------------------------------
 }
+
 
 void BuzzerISR(void){   //ISR
   if (BzCount == BzThr){
@@ -233,7 +253,7 @@ void LoopPSload(){
 
   while (mode == 0){                  //PSLoad normal mode
     if (Ch1.DataReady)  Ch1.GetData();           // ~6 us
-    if (Ch1.DispData)   Ch1.dipsData();          //~5750 us
+    if (Ch1.DispData)   Ch1.dipsData();          //~4403 us
 
 
     if (sendVolt) {
@@ -257,7 +277,7 @@ void LoopPSload(){
     processNumPad(keyreturn);
 
 
-    if (FanMetro.check())  FanContr();
+    if (FanMetro.check())  FanContr();              // 1710 us
 
   /*
     if (IoT.check()){
@@ -338,136 +358,6 @@ void shaft_moved(){   //ISR
     Ch1.Inset = constrain(Ch1.Inset, 0.000001, 5.0);
   }
 }
-
-/*
-float checkKeys(){      //~ 1770 us
-
-  const byte MAX_CHARS = 9;
-  static char inputBuffer[MAX_CHARS];
-  static uint8_t inputIndex = 0;
-  static float floatTotal = 0;
-  static uint8_t intTotal;
-
-  char key = keypad.getKey();
-
-  //if (key >= '0'){
-    //Serial.print("key:  ");
-    //Serial.println(key);
-  //}
-  
-  //tft.setTextDatum(TL_DATUM);
-  //tft.setTextPadding(135);
-  //tft.drawChar(key, 10, 150, 4);
-  //tft.drawNumber(factor, 10, 170, 4);
-
-  //if (key == 0) return;
-
-  if (key == 'H'){
-    factor++;
-    factor = constrain(factor, 0, 4);
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='G'){
-    factor--;
-    factor = constrain(factor, 0, 4);
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='E'){
-    Ch1.PwSet = !Ch1.PwSet;               //PowerToggle Ch1
-    if (Ch1.PwSet) Ch1.SendData('o');
-    else Ch1.SendData('f');
-    Serial.println("Power Toggle");
-    return -1.0;
-  }else if (key =='F'){
-                   //PowerToggle Ch2
-    return -1.0;
-  }else if (key =='J'){
-    ChannelSet = 0;
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='I'){
-    ChannelSet = 1;
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='K'){
-    return -1.0;
-  }else if (key =='L'){
-    Ch1.SendData('Y');
-    Serial.println("Request Data");
-    return -1.0;
-  }else if (key =='M'){
-    //if (digitalRead(InterrSW) == 0) mode = 1;       //Enter Cal Function
-    //Serial.println("why: ");
-    return -1.0;
-  }else if (key == 'A'){
-    SetType = 0;                        //Set V
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    //Serial.println("A");
-    return -1.0;
-
-  }else if (key == 'B'){
-    SetType = 1;                        //Set I+
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    //Serial.println("B");
-    return -1.0;
-
-  }else if (key == 'C'){
-    SetType = 2;                        //Set I-
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    //Serial.println("C");
-    return -1.0;
-
-  }else if (key =='D'){
-    //Serial.println("D");
-    //SendDataToCh1('q', DAC1m);
-    //SendDataToCh1('w', DAC1b);
-    return -1.0;
-  }
-  
-  if (key == '#') //user signal that entry has finished
-  {
-    //Serial.println();
-    //Serial.println("entry is complete");
-    floatTotal = atof(inputBuffer);  //convert buffer to a float
-    //Serial.println(floatTotal, 3);
-    //floatTotal = 0;
-    inputIndex = 0;
-
-    tft.setTextDatum(TR_DATUM);
-    tft.setTextPadding(112);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("", 150, 120, 4);
-
-    return floatTotal; //exit the function
-  }
-  if (key >= '0' && key <= '9' || key == '.') //only act on numeric or '.' keys
-  {
-    inputBuffer[inputIndex] = key;  //put the key value in the buffer
-    if (inputIndex != MAX_CHARS - 1)
-    {
-      inputIndex++; //increment the array
-    }
-    inputBuffer[inputIndex] = '\0';  //terminate the string
-
-    tft.setTextDatum(TR_DATUM);
-    tft.setTextPadding(112);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString(inputBuffer, 150, 120, 4);
-    //Serial.print("inputBuffer:  ");
-    //Serial.println(inputBuffer);
-
-
-    return -1.0;
-  }
-}
-*/
 
 float checkKeys(){      //~ 1770 us  / or ~ 1 us
   float Return = -1.0;
@@ -623,6 +513,8 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
 void FanContr(void){    // 1710 us
   //uint32_t yTime = micros();
 
+  Serial.println(InternalTemperature.readTemperatureC(),1);
+
 
   float maxTemp = Ch1.temp1;
   if (maxTemp < Ch1.temp2) maxTemp = Ch1.temp2;
@@ -633,16 +525,18 @@ void FanContr(void){    // 1710 us
 
   analogWrite(Fan, PWM);
 
-  uint16_t PWMperct = PWM * 100 / 255;
+  //uint16_t PWMperct = PWM * 100 / 255;
 
 
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextPadding(60);
+  tft.setTextDatum(TR_DATUM);
+  tft.setTextPadding(25);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawNumber(PWMperct, 200, 0, 2);
+  tft.drawNumber(PWM * 100 / 255, 170, 0, 2);
 
-  tft.drawFloat(Ch1.temp1, 1, 0, 0, 2);
-  tft.drawFloat(Ch1.temp2, 1, 60, 0, 2);
+  tft.setTextPadding(34);
+  //tft.setTextDatum(TR_DATUM);
+  tft.drawFloat(maxTemp, 1, 95, 0, 2);
+
 
 
   //yTime = micros() - yTime;
@@ -691,6 +585,6 @@ void RotBtnISR(){   //ISR
   //sendData = 1;
 }
 
-void ErrorCh1_ISR(void){
+void ErrorCh1_ISR(void){   //ISR
   Buzzer(2000);
 }
