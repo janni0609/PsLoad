@@ -142,9 +142,9 @@ public:
     Amp = avgAmp->reading(Amp);             //mooving Average
 
     tft.setTextDatum(TR_DATUM);
-    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-
     tft.setTextPadding(135);
+
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.drawFloat(Volt, 5, 125, 30, 4);
 
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
@@ -198,10 +198,10 @@ public:
     
     tft.fillRect(0, 0, 320, 240, TFT_BLACK);
 
-    tft.fillRect(159, 20, 2, 240, TFT_RED);
-    tft.drawFastHLine(60, 20, 200, TFT_RED);
-    tft.drawFastVLine(60, 0, 20, TFT_RED);
-    tft.drawFastVLine(260, 0, 20, TFT_RED);
+    tft.fillRect(159, 16, 2, 225, TFT_RED);
+    tft.drawFastHLine(60, 16, 200, TFT_RED);
+    tft.drawFastVLine(60, 0, 16, TFT_RED);
+    tft.drawFastVLine(260, 0, 16, TFT_RED);
 
     tft.setTextPadding(0);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -265,34 +265,40 @@ public:
     tft.drawFloat(Inset, 4, 125, 210, 4);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     //upDateUndLine = 1;
-    underLine();
+    //underLine();
   }
 
   void underLine(){
-    tft.fillRect(0, 172, 124, 4, TFT_BLACK);
-    tft.fillRect(0, 202, 124, 4, TFT_BLACK);
-    tft.fillRect(0, 232, 124, 4, TFT_BLACK);
+    myTime = micros();
+    tft.fillRect(0, 176, 124, 4, TFT_BLACK);    //172
+    tft.fillRect(0, 206, 124, 4, TFT_BLACK);
+    tft.fillRect(0, 236, 124, 4, TFT_BLACK);
     if (SetType == 0){
-      if (factor == 0)      tft.fillRect(112, 172, 12, 4, TFT_MAGENTA);
-      else if (factor == 1) tft.fillRect(98, 172, 12, 4, TFT_MAGENTA);
-      else if (factor == 2) tft.fillRect(84, 172, 12, 4, TFT_MAGENTA);
-      else if (factor == 3) tft.fillRect(63, 172, 12, 4, TFT_MAGENTA);
-      else if (factor == 4) tft.fillRect(49, 172, 12, 4, TFT_MAGENTA);
+      //tft.fillRect(0, 172, 124, 4, TFT_BLACK);
+      if (factor == 0)      tft.fillRect(112, 176, 12, 4, TFT_MAGENTA);
+      else if (factor == 1) tft.fillRect(98, 176, 12, 4, TFT_MAGENTA);
+      else if (factor == 2) tft.fillRect(84, 176, 12, 4, TFT_MAGENTA);
+      else if (factor == 3) tft.fillRect(63, 176, 12, 4, TFT_MAGENTA);
+      else if (factor == 4) tft.fillRect(49, 176, 12, 4, TFT_MAGENTA);
 
     }else if (SetType == 1){
-      if (factor == 0)      tft.fillRect(112, 202, 12, 4, TFT_MAGENTA);
-      else if (factor == 1) tft.fillRect(98, 202, 12, 4, TFT_MAGENTA);
-      else if (factor == 2) tft.fillRect(84, 202, 12, 4, TFT_MAGENTA);
-      else if (factor == 3) tft.fillRect(70, 202, 12, 4, TFT_MAGENTA);
-      else if (factor == 4) tft.fillRect(49, 202, 12, 4, TFT_MAGENTA);
+      //tft.fillRect(0, 202, 124, 4, TFT_BLACK);
+      if (factor == 0)      tft.fillRect(112, 206, 12, 4, TFT_MAGENTA);
+      else if (factor == 1) tft.fillRect(98, 206, 12, 4, TFT_MAGENTA);
+      else if (factor == 2) tft.fillRect(84, 206, 12, 4, TFT_MAGENTA);
+      else if (factor == 3) tft.fillRect(70, 206, 12, 4, TFT_MAGENTA);
+      else if (factor == 4) tft.fillRect(49, 206, 12, 4, TFT_MAGENTA);
 
     }else if (SetType == 2){
-      if (factor == 0)      tft.fillRect(112, 232, 12, 4, TFT_MAGENTA);
-      else if (factor == 1) tft.fillRect(98, 232, 12, 4, TFT_MAGENTA);
-      else if (factor == 2) tft.fillRect(84, 232, 12, 4, TFT_MAGENTA);
-      else if (factor == 3) tft.fillRect(70, 232, 12, 4, TFT_MAGENTA);
-      else if (factor == 4) tft.fillRect(49, 232, 12, 4, TFT_MAGENTA);
+      //tft.fillRect(0, 232, 124, 4, TFT_BLACK);
+      if (factor == 0)      tft.fillRect(112, 236, 12, 4, TFT_MAGENTA);
+      else if (factor == 1) tft.fillRect(98, 236, 12, 4, TFT_MAGENTA);
+      else if (factor == 2) tft.fillRect(84, 236, 12, 4, TFT_MAGENTA);
+      else if (factor == 3) tft.fillRect(70, 236, 12, 4, TFT_MAGENTA);
+      else if (factor == 4) tft.fillRect(49, 236, 12, 4, TFT_MAGENTA);
     }
+    myTime = micros() - myTime;
+    Serial.println(myTime);
   }
 
   void CalMode(){   //Serial Parameter

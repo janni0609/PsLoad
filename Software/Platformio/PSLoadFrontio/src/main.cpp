@@ -1,163 +1,134 @@
-#include <Arduino.h>
+  #include <Arduino.h>
+
+  void ErrorCh1_ISR(void);
+  void RotBtnISR(void);
+  void DataReadyCH1(void);
+  void ModeSwISR(void);
+  void processNumPad(float num);
+  void FanContr(void);
+  float checkKeys(void);
+  void shaft_moved(void);
+  float factorSelI(void);
+  float factorSelV(void);
+  void Buzzer(uint32_t buzzMS);
+  void BuzzerISR(void);
 
 
-void ErrorCh1_ISR(void);
-void RotBtnISR(void);
-void DataReadyCH1(void);
-void ModeSwISR(void);
-void processNumPad(float num);
-void FanContr(void);
-float checkKeys(void);
-void shaft_moved(void);
-float factorSelI(void);
-float factorSelV(void);
-void Buzzer(uint32_t buzzMS);
-void BuzzerISR(void);
+  #include "SPI.h"
+  #include "TFT_eSPI.h"
+
+  TFT_eSPI tft = TFT_eSPI();
+
+  TFT_eSprite SprCh1 = TFT_eSprite(&tft);
 
 
-#include "SPI.h"
-#include "TFT_eSPI.h"
-
-TFT_eSPI tft = TFT_eSPI();
-
-TFT_eSprite SprCh1 = TFT_eSprite(&tft);
-
-
-#include <InternalTemperature.h>
-
-
-
-float checkKeys();
-void Buzzer(uint32_t buzzMS);
+  #include <InternalTemperature.h>
 
 
 
-//float VoltCH1, AmpCH1, WattCH1, temp1, temp2;//
-
-uint32_t myTime;
-
-const uint8_t DataIn1 = 5;
-const uint8_t DataIn2 = 3;
-const uint8_t DataOut1 = 4;
-const uint8_t DataOut2 = 2;
-
-const uint8_t InterrSW = 33;
-
-const uint8_t BuzzerPin = 39;
-
-const uint8_t Debug = 40;
-
-const uint8_t Fan = 19;
-
-bool Error = 0;
-
-//bool DataReadyCh1 = 0;//
-//bool DispData = 0;//
+  float checkKeys();
+  void Buzzer(uint32_t buzzMS);
 
 
 
 
-//------------------------------------------------------------------------------------------------
-//Encoder
-const uint8_t RotClk = 21;
-const uint8_t RotDt = 22;
 
-const uint8_t RotBtn = 13;
+  uint32_t myTime;
 
-bool last_run = LOW;
-bool aState;
-bool lastaState;
+  const uint8_t DataIn1 = 5;
+  const uint8_t DataIn2 = 3;
+  const uint8_t DataOut1 = 4;
+  const uint8_t DataOut2 = 2;
 
-bool sendData = 0;
+  const uint8_t InterrSW = 33;
 
-bool sendVolt = 0;
-bool sendCurrP = 0;
-bool sendCurrN = 0;
+  const uint8_t BuzzerPin = 39;
 
-//------------------------------------------------------------------------------------------------
-//SetPoints CH1
-//float VsetCH1 = 5.0;//
-//float IpsetCH1 = 1.0;//
-//float InsetCH1 = 1.0;//
+  const uint8_t Debug = 40;
 
-//bool PwSetCH1 = 0;//
+  const uint8_t Fan = 19;
 
-int8_t factor = 0;
-uint8_t SetType = 0;            // 0: Vset, 1: Ipset, 2:Inset
-bool ChannelSet = 0;            // 0: CH1, 1: CH2
-
-//bool upDateUndLine = 1;
-volatile uint8_t mode = 0;               // 0: normla PSLoad Mode,
-
-bool CalVal = 0;
-
-//------------------------------------------------------------------------------------------------
-//Metro
-#include <Metro.h>                      //Include Metro library
-
-Metro FanMetro = Metro(250);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
-
-//Metro IoT = Metro(1000);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//Cal
-
-const double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
-double VoltDacOffsets[] =    {0.0,    0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
-double VoltAdcOffsets[] =    {0.0,    0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
+  bool Error = 0;
 
 
-const double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     0.0,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
-double AmpAdcOffsets[20];
+  //------------------------------------------------------------------------------------------------
+  //Encoder
+  const uint8_t RotClk = 21;
+  const uint8_t RotDt = 22;
 
-const double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
-double AmpDacPOffsets[] =   {0.0,     0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
-double AmpDacNOffsets[] =   {0.0,     0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
+  const uint8_t RotBtn = 13;
+
+  bool last_run = LOW;
+  bool aState;
+  bool lastaState;
+
+  bool sendData = 0;
+
+  bool sendVolt = 0;
+  bool sendCurrP = 0;
+  bool sendCurrN = 0;
+
+  //------------------------------------------------------------------------------------------------
+
+  int8_t factor = 0;
+  uint8_t SetType = 0;            // 0: Vset, 1: Ipset, 2:Inset
+  bool ChannelSet = 0;            // 0: CH1, 1: CH2
+
+  volatile uint8_t mode = 0;               // 0: normla PSLoad Mode,
+
+  bool CalVal = 0;
+
+  //------------------------------------------------------------------------------------------------
+  //Metro
+  #include <Metro.h>                      //Include Metro library
+
+  Metro FanMetro = Metro(250);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
+
+  //Metro IoT = Metro(1000);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
+
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+  #include <Keypad.h>
+
+  const byte ROWS = 5; //four rows
+  const byte COLS = 5; //three columns
+  char keys[ROWS][COLS] = {
+    {'1','2','3','A','I'},
+    {'4','5','6','B','J'},
+    {'7','8','9','C','K'},
+    {'.','0','#','D','L'},
+    {'E','F','G','H','M'}
+  };
+  byte rowPins[ROWS] = {32, 31, 30, 29, 28}; //connect to the row pinouts of the keypad
+  byte colPins[COLS] = {35, 36, 37, 38, 34}; //connect to the column pinouts of the keypad
+
+  Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 
-//------------------------------------------------------------------------------------------------
-//SetPoints CH1
-#include <Keypad.h>
+  #include "PSLoad.h"
 
-const byte ROWS = 5; //four rows
-const byte COLS = 5; //three columns
-char keys[ROWS][COLS] = {
-  {'1','2','3','A','I'},
-  {'4','5','6','B','J'},
-  {'7','8','9','C','K'},
-  {'.','0','#','D','L'},
-  {'E','F','G','H','M'}
-};
-byte rowPins[ROWS] = {32, 31, 30, 29, 28}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {35, 36, 37, 38, 34}; //connect to the column pinouts of the keypad
-
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
+  #include <movingAvgFloat.h>
 
 
-#include "PSLoad.h"
+  movingAvgFloat avgVoltCH1(10);
+  movingAvgFloat avgAmpCH1(10);
 
-#include <movingAvgFloat.h>
+  movingAvgFloat avgVoltCalCH1(50);
+  movingAvgFloat avgAmpCH1Cal(50);
 
-
-movingAvgFloat avgVoltCH1(10);
-movingAvgFloat avgAmpCH1(10);
-
-movingAvgFloat avgVoltCalCH1(50);
-movingAvgFloat avgAmpCH1Cal(50);
-
-movingAvgFloat* avgTypeCh1[] = { &avgVoltCH1, &avgAmpCH1, &avgVoltCalCH1, &avgAmpCH1Cal};
-//movingAvgFloat* avgTypeCh2[] = { &avgVoltCH2, &avgAmpCH2, &avgVoltCalCH2, &avgAmpCH2Cal};
+  movingAvgFloat* avgTypeCh1[] = { &avgVoltCH1, &avgAmpCH1, &avgVoltCalCH1, &avgAmpCH1Cal};
+  //movingAvgFloat* avgTypeCh2[] = { &avgVoltCH2, &avgAmpCH2, &avgVoltCalCH2, &avgAmpCH2Cal};
 
 
 
-PSLoad Ch1(avgTypeCh1, &Serial1, DataOut1, DataOut2);
+  PSLoad Ch1(avgTypeCh1, &Serial1, DataOut1, DataOut2);
 
-//------------------------------------------------------------------------------------------------
-// Buzzer Timer
-#include <TimerThree.h>
+  //------------------------------------------------------------------------------------------------
+  // Buzzer Timer
+  #include <TimerThree.h>
 
-volatile uint32_t BzCount = 0;
-volatile uint32_t BzThr = 1000;
+  volatile uint32_t BzCount = 0;
+  volatile uint32_t BzThr = 1000;
 
 
 void setup() 
@@ -277,7 +248,7 @@ void LoopPSload(){
     processNumPad(keyreturn);
 
 
-    if (FanMetro.check())  FanContr();              // 1710 us
+    if (FanMetro.check())  FanContr();              // 450 us
 
   /*
     if (IoT.check()){
@@ -510,17 +481,17 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
   return Return;
 }
 
-void FanContr(void){    // 1710 us
+void FanContr(void){    // 450 us
   //uint32_t yTime = micros();
 
-  Serial.println(InternalTemperature.readTemperatureC(),1);
+  //Serial.println(InternalTemperature.readTemperatureC(),1);
 
 
   float maxTemp = Ch1.temp1;
   if (maxTemp < Ch1.temp2) maxTemp = Ch1.temp2;
   uint16_t PWM;
   if (maxTemp <= 35.0) PWM = 0;
-  else if (maxTemp > 35.0) PWM = 15.0 * maxTemp - 380.0;
+  else PWM = 15.0 * maxTemp - 380.0;
   PWM = constrain(PWM, 0, 255);
 
   analogWrite(Fan, PWM);
@@ -536,6 +507,8 @@ void FanContr(void){    // 1710 us
   tft.setTextPadding(34);
   //tft.setTextDatum(TR_DATUM);
   tft.drawFloat(maxTemp, 1, 95, 0, 2);
+
+  //Serial.println(tft.fontHeight(2));
 
 
 
