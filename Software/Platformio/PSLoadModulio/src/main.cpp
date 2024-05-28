@@ -284,7 +284,7 @@ void CheckSerialRx(void)
       dac.writeChannel(DAC_CHANNEL_A, uint16_t(num));
       //Serial.println(num);
     }
-    if (first == 'i') {
+    else if (first == 'i') {
       num = Serial.parseFloat();
       num += float(Linear(AmpSetPoints, AmpDacPOffsets, 10, double(num), false));                     // cal
       num = constrain(num, 0.0, 5.0);
@@ -292,7 +292,7 @@ void CheckSerialRx(void)
       dac.writeChannel(DAC_CHANNEL_B, uint16_t(num));
       //Serial.println(num);
     }
-    if (first == 's') {
+    else if (first == 's') {
       num = Serial.parseFloat();
       num += float(Linear(AmpSetPoints, AmpDacNOffsets, 10, double(num), false));                     // cal
       num = constrain(num, 0.0, 5.0);
@@ -300,72 +300,72 @@ void CheckSerialRx(void)
       dac.writeChannel(DAC_CHANNEL_C, uint16_t(num));
       //Serial.println(num);
     }
-    if (first == 'o') {                                  //on
+    else if (first == 'o') {                                  //on
       digitalWrite(OnPhoto, HIGH);
       //delayMicroseconds(1200);                           //mos turn on delay
       digitalWrite(ON, HIGH);
       //Serial.println("output ON");
     }
-    if (first == 'f') {                                  //off
+    else if (first == 'f') {                                  //off
       digitalWrite(OnPhoto, LOW);
       //delayMicroseconds(300);                            //mos turn off delay
       digitalWrite(ON, LOW);
       //Serial.println("output OFF");
     }
-    if (first == 'h') {                                  //Sense internal
+    else if (first == 'h') {                                  //Sense internal
       digitalWrite(SenseSW, LOW);
       //Serial.println("Sense internal");
     }
-    if (first == 'u') {                                  //Sense external
+    else if (first == 'u') {                                  //Sense external
       digitalWrite(SenseSW, HIGH);
       //Serial.println("Sense external");
     }
-    if (first == 'r') {                                  //Raw Data in
+    else if (first == 'r') {                                  //Raw Data in
       uint16_t Raw = Serial.parseInt();
       
       dac.writeChannel(DAC_CHANNEL_A, Raw);
       //Serial.println(num);
     }
-    if (first == 'X') {
+    else if (first == 'X') {
       //EEPROM.put(0, StorCalConst);
       Zero(VoltDacOffsets, 10);
       Zero(VoltAdcOffsets, 10);
     }
-    if (first == 'x') {
+    else if (first == 'x') {
       //EEPROM.put(0, StorCalConst);
       Zero(AmpDacPOffsets, 10);
       Zero(AmpDacNOffsets, 10);
       Zero(AmpAdcOffsets, 20);
     }
-    if (first == 'Y') {
+    else if (first == 'Y') {
       SendArray('y', VoltDacOffsets);
     }
-    if (first == 'L'){
+    else if (first == 'L'){
       uint8_t n = Serial.parseInt();
       float flt = Serial.parseFloat();
       VoltDacOffsets[n] = flt;
     }
-    if (first == 'K'){
+    else if (first == 'K'){
       uint8_t n = Serial.parseInt();
       float flt = Serial.parseFloat();
       VoltAdcOffsets[n] = flt;
     }
-    if (first == 'I'){
+    else if (first == 'I'){
       uint8_t n = Serial.parseInt();
       float flt = Serial.parseFloat();
       AmpDacPOffsets[n] = flt;
     }
-    if (first == 'O'){
+    else if (first == 'O'){
       uint8_t n = Serial.parseInt();
       float flt = Serial.parseFloat();
       AmpDacNOffsets[n] = flt;
     }
-    if (first == 'P'){
+    else if (first == 'P'){
       uint8_t n = Serial.parseInt();
       float flt = Serial.parseFloat();
       AmpAdcOffsets[n] = flt;
     }
-    if (first == 'S') {                                  //Cal
+    else if (first == 'S') {                                  //store Cal
       EEPROM.put(0, VoltDacOffsets);
       EEPROM.put(40, VoltAdcOffsets);
       EEPROM.put(80, AmpDacPOffsets);

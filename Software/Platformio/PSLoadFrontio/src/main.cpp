@@ -1,5 +1,6 @@
   #include <Arduino.h>
 
+
   void ErrorCh1_ISR(void);
   void RotBtnISR(void);
   void DataReadyCH1(void);
@@ -23,14 +24,6 @@
 
 
   #include <InternalTemperature.h>
-
-
-
-  float checkKeys();
-  void Buzzer(uint32_t buzzMS);
-
-
-
 
 
   uint32_t myTime;
@@ -86,8 +79,7 @@
 
   //Metro IoT = Metro(1000);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
 
-  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+  //------------------------------------------------------------------------------------------------
   #include <Keypad.h>
 
   const byte ROWS = 5; //four rows
@@ -103,7 +95,7 @@
   byte colPins[COLS] = {35, 36, 37, 38, 34}; //connect to the column pinouts of the keypad
 
   Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
-
+  //------------------------------------------------------------------------------------------------
 
   #include "PSLoad.h"
 
