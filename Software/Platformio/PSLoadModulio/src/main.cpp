@@ -232,8 +232,8 @@ void setup()
 
 void loop()
 {
-  //if (ReadSerial == 1) CheckSerialRx();
-  CheckSerialRx();
+  if (ReadSerial == 1) CheckSerialRx();
+  //CheckSerialRx();
 
   if (digitalRead(DataIn2) && prozessStuff == 1 && OpMode == 0){
     //myTime = millis();
@@ -270,11 +270,11 @@ void loop()
 }
 
 
-void CheckSerialRx(void)
+void CheckSerialRx(void)      // ~ 600us
 {
 
 
-  myTime = millis();
+  //myTime = micros();
   while (Serial.available() > 0) {
     float num = 0.0;
     char first = Serial.read();
@@ -377,8 +377,8 @@ void CheckSerialRx(void)
   }
   ReadSerial = 0;
 
-  myTime = millis() - myTime;
-  SendDebug(myTime);
+  //myTime = micros() - myTime;
+  //SendDebug(myTime);
 }
 
 void Zero(double * array, int size){
