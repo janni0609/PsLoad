@@ -272,7 +272,9 @@ void loop()
 
 void CheckSerialRx(void)
 {
-  
+
+
+  myTime = millis();
   while (Serial.available() > 0) {
     float num = 0.0;
     char first = Serial.read();
@@ -374,7 +376,9 @@ void CheckSerialRx(void)
     }
   }
   ReadSerial = 0;
-  
+
+  myTime = millis() - myTime;
+  SendDebug(myTime);
 }
 
 void Zero(double * array, int size){
