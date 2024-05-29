@@ -13,6 +13,7 @@ void ReadTemps();
 void SendData();
 void ReadADCs();
 double Linear(double xValues[], double yValues[], int numValues, double pointX, bool trim);
+void SendDebug(float data);
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -94,7 +95,7 @@ bool OTP_flag = 0;
   float Volts, Amps, Temp1, Temp2;
   volatile bool ReadSerial = 0;
 
-  bool OpMode = 0;      // 0 : Normal Power Supply Mode ; 1 : Capcity Meas Mode
+  bool OpMode = 1;      // 0 : Normal Power Supply Mode ; 1 : Capcity Meas Mode
 
   float AmpH, WattH;
 
@@ -252,7 +253,7 @@ void loop()
   else if (digitalRead(DataIn2) && prozessStuff == 1 && OpMode == 1){
     ReadADCs();
     ReadTemps();
-    //SendData();
+    SendData();
 
 
 
@@ -260,8 +261,13 @@ void loop()
 
     uint32_t deltaTime = Time - oldTime;
 
-    AmpH =+ Amps * deltaTime * (1.0/3600000.0);
+    //AmpH =+ Amps * deltaTime * (1.0/3600000.0);
+    AmpH = AmpH + (Amps * deltaTime * (1.0/3600000.0));
+
     //WattH =+ Watts * deltaTime * (1.0/3600000.0);
+    //SendDebug(deltaTime);
+    SendDebug(AmpH);
+
 
     oldTime = Time;
     
@@ -403,6 +409,14 @@ void SendDebug(uint32_t data){
   digitalWrite(DataOut1,LOW);
   Serial.println("v");
   Serial.print(data);
+  Serial.println("l");
+  digitalWrite(DataOut1,HIGH);
+}
+
+void SendDebug(float data){
+  digitalWrite(DataOut1,LOW);
+  Serial.println("y");
+  Serial.print(data,6);
   Serial.println("l");
   digitalWrite(DataOut1,HIGH);
 }
