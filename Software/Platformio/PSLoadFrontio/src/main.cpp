@@ -13,6 +13,7 @@
   float factorSelV(void);
   void Buzzer(uint32_t buzzMS);
   void BuzzerISR(void);
+  float constrBeep(float num, float min, float max, uint32_t beep);
 
 
   #include "SPI.h"
@@ -191,7 +192,6 @@ void setup()
   //------------------------------------------------------------------------------------------------
 }
 
-
 void BuzzerISR(void){   //ISR
   if (BzCount == BzThr){
     digitalWrite(BuzzerPin, LOW);
@@ -206,7 +206,6 @@ void Buzzer(uint32_t buzzMS){
   Timer3.restart();
   digitalWrite(BuzzerPin, HIGH);
 }
-
 
 void LoopPSload(){
 
@@ -255,7 +254,6 @@ void LoopPSload(){
 
   }       //while loop
 }         //function
-
 
 float factorSelV(void){
   if (factor == 0) return 0.001;
@@ -316,9 +314,14 @@ void shaft_moved(){   //ISR
 
       }
     }
-    Ch1.Vset = constrain(Ch1.Vset, 0.02, 25.0);
-    Ch1.Ipset = constrain(Ch1.Ipset, 0.000001, 5.0);
-    Ch1.Inset = constrain(Ch1.Inset, 0.000001, 5.0);
+    //Ch1.Vset = constrain(Ch1.Vset, 0.02, 25.0);
+    //Ch1.Ipset = constrain(Ch1.Ipset, 0.000001, 5.0);
+    //Ch1.Inset = constrain(Ch1.Inset, 0.000001, 5.0);
+
+    Ch1.Vset = constrBeep(Ch1.Vset, 0.0, 25.0, 20);
+    Ch1.Ipset = constrBeep(Ch1.Ipset, 0.0, 5.0, 20);
+    Ch1.Inset = constrBeep(Ch1.Inset, 0.0, 5.0, 20);
+
   }
 }
 
@@ -513,16 +516,13 @@ void processNumPad(float num){
   
   if(ChannelSet == 0){                      //Set Ch1
     if (SetType == 0){                      //Set Volts
-      num = constrain(num, 0.01, 25.0);
-      Ch1.Vset = num;
+      Ch1.Vset = constrBeep(num, 0.0, 25.0, 20);
       sendVolt = 1;
     }else if(SetType == 1){                 //Set I +
-      num = constrain(num, 0.000001, 5.0);
-      Ch1.Ipset = num;
+      Ch1.Ipset = constrBeep(num, 0.0, 5.0, 20);
       sendCurrP = 1;
     }else if(SetType == 2){                 //Set I +
-      num = constrain(num, 0.000001, 5.0);
-      Ch1.Inset = num;
+      Ch1.Inset = constrBeep(num, 0.0, 5.0, 20);
       sendCurrN = 1;
     }
   }
@@ -552,4 +552,15 @@ void RotBtnISR(){   //ISR
 
 void ErrorCh1_ISR(void){   //ISR
   Buzzer(2000);
+}
+
+float constrBeep(float num, float min, float max, uint32_t beep){
+  if (num < min){
+    num = min;
+    Buzzer(beep);
+  }else if (num > max){
+    num = max;
+    Buzzer(beep);
+  }
+  return num;
 }

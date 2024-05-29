@@ -250,6 +250,7 @@ public:
     SendData('s', Inset);
 
     dispSetData();
+    underLine();
 
     Serial.println("Start");
     digitalWrite(DataOut_2, HIGH);
