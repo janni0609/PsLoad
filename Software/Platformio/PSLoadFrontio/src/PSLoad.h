@@ -98,6 +98,7 @@ public:
   }
 
   void GetData(void){     // ~6 us
+    DataReady = 0;
     //myTime = micros();
     while (serialPort->available() > 0){
       //Serial.println("Get Data");
@@ -127,7 +128,7 @@ public:
 
       }
     }
-    DataReady = 0;
+    
     DispData = 1;
 
     //myTime = micros() - myTime;

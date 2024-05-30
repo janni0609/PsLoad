@@ -278,7 +278,7 @@ void loop()
 
 void CheckSerialRx(void)      // ~ 600us
 {
-
+  ReadSerial = 0;
 
   //myTime = micros();
   while (Serial.available() > 0) {
@@ -381,7 +381,7 @@ void CheckSerialRx(void)      // ~ 600us
       EEPROM.put(160, AmpAdcOffsets);
     }
   }
-  ReadSerial = 0;
+  
 
   //myTime = micros() - myTime;
   //SendDebug(myTime);
