@@ -476,7 +476,7 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
   return Return;
 }
 
-void FanContr(void){    // 450 us
+void FanContr(void){    //450 us      392 us    drawNum : 385 us
   //uint32_t yTime = micros();
 
   //Serial.println(InternalTemperature.readTemperatureC(),1);
@@ -495,13 +495,18 @@ void FanContr(void){    // 450 us
 
 
   tft.setTextDatum(TR_DATUM);
-  tft.setTextPadding(25);
+  tft.setTextPadding(22);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawNumber(PWM * 100 / 255, 170, 0, 2);
+  tft.drawNumber(PWM * 100 / 255, 153, 0, 2);
+  //tft.drawNumber(100, 153, 0, 2);
 
-  tft.setTextPadding(34);
+  //tft.drawNumber(InternalTemperature.readTemperatureC(), 220, 0, 2);
+
+  tft.setTextPadding(22);
   //tft.setTextDatum(TR_DATUM);
-  tft.drawFloat(maxTemp, 1, 95, 0, 2);
+  tft.drawNumber(uint8_t(maxTemp), 83, 0, 2);
+
+  tft.drawNumber(uint8_t(maxTemp), 248, 0, 2);
 
   //Serial.println(tft.fontHeight(2));
 

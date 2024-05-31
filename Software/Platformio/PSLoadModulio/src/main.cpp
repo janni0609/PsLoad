@@ -95,7 +95,7 @@ bool OTP_flag = 0;
   float Volts, Amps, Temp1, Temp2;
   volatile bool ReadSerial = 0;
 
-  bool OpMode = 1;      // 0 : Normal Power Supply Mode ; 1 : Capcity Meas Mode
+  bool OpMode = 0;      // 0 : Normal Power Supply Mode ; 1 : Capcity Meas Mode
 
   float AmpH, WattH;
 
