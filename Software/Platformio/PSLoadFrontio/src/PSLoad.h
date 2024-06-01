@@ -135,7 +135,7 @@ public:
     //Serial.println(myTime);
   }
 
-  void dipsData(){        //~4403 us
+  void dipsData(){        // 600 MHz :  ~4403 us    816 MHz : 3895 us     960 MHz : 3577 us
 
     //myTime = micros();
     //digitalWrite(Debug, HIGH);
@@ -192,8 +192,6 @@ public:
     //myTime = micros() - myTime;
     //Serial.println(myTime);
   }
-  
-
 
   void initPSLoad(){
     
@@ -207,12 +205,19 @@ public:
     tft.setTextPadding(0);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.setTextDatum(TL_DATUM);
-    tft.drawChar('C', 97, 0, 2);
-    tft.drawChar('%', 175, 0, 2);
-    tft.drawString("Fan:", 115, 0, 2);
+    tft.drawChar('C', 85, 0, 2);
+    tft.drawChar('C', 250, 0, 2);
+    tft.drawChar('%', 155, 0, 2);
+    tft.drawString("Fan:", 102, 0, 2);
+    //tft.drawString("MCU:", 170, 0, 2);
+
 
     tft.drawString("Ch.1", 0, 0, 4);
+    tft.setTextDatum(TR_DATUM);
+    tft.drawString("Ch.2", 320, 0, 4);
 
+
+    tft.setTextDatum(TL_DATUM);
     //tft.setTextPadding(100);
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.drawChar('V', 135, 30, 4);

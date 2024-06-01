@@ -1,681 +1,162 @@
-
-#include "SPI.h"
-#include "TFT_eSPI.h"
-
-float checkKeys();
-void Buzzer(uint32_t buzzMS);
-
-TFT_eSPI tft = TFT_eSPI();
-
-//float VoltCH1, AmpCH1, WattCH1, temp1, temp2;//
-
-uint32_t myTime;
-
-const uint8_t DataIn1 = 5;
-const uint8_t DataIn2 = 3;
-const uint8_t DataOut1 = 4;
-const uint8_t DataOut2 = 2;
-
-const uint8_t InterrSW = 33;
-
-const uint8_t BuzzerPin = 39;
-
-const uint8_t Debug = 40;
-
-const uint8_t Fan = 19;
-
-bool Error = 0;
-
-//bool DataReadyCh1 = 0;//
-//bool DispData = 0;//
-
-
-
-
-//------------------------------------------------------------------------------------------------
-//Encoder
-const uint8_t RotClk = 21;
-const uint8_t RotDt = 22;
-
-const uint8_t RotBtn = 13;
-
-bool last_run = LOW;
-bool aState;
-bool lastaState;
-
-bool sendData = 0;
-
-bool sendVolt = 0;
-bool sendCurrP = 0;
-bool sendCurrN = 0;
-
-//------------------------------------------------------------------------------------------------
-//SetPoints CH1
-//float VsetCH1 = 5.0;//
-//float IpsetCH1 = 1.0;//
-//float InsetCH1 = 1.0;//
-
-//bool PwSetCH1 = 0;//
-
-int8_t factor = 0;
-uint8_t SetType = 0;            // 0: Vset, 1: Ipset, 2:Inset
-bool ChannelSet = 0;            // 0: CH1, 1: CH2
-
-//bool upDateUndLine = 1;
-volatile uint8_t mode = 0;               // 0: normla PSLoad Mode,
-
-bool CalVal = 0;
-
-//------------------------------------------------------------------------------------------------
-//Metro
-#include <Metro.h>                      //Include Metro library
-
-Metro FanMetro = Metro(250);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
-
-//Metro IoT = Metro(1000);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-//Cal
-
-const double VoltSetPoints[] =     {0.03,   0.05,     0.1,    1.0,    5.0,    10.0,   15.0,   20.0,   24.0,   25.0};
-double VoltDacOffsets[] =    {0.0,    0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
-double VoltAdcOffsets[] =    {0.0,    0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
-
-
-const double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     0.0,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
-double AmpAdcOffsets[20];
-
-const double AmpSetPoints[] =     {0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
-double AmpDacPOffsets[] =   {0.0,     0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
-double AmpDacNOffsets[] =   {0.0,     0.0,      0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0};
-
-
-//------------------------------------------------------------------------------------------------
-//SetPoints CH1
-#include <Keypad.h>
-
-const byte ROWS = 5; //four rows
-const byte COLS = 5; //three columns
-char keys[ROWS][COLS] = {
-  {'1','2','3','A','I'},
-  {'4','5','6','B','J'},
-  {'7','8','9','C','K'},
-  {'.','0','#','D','L'},
-  {'E','F','G','H','M'}
-};
-byte rowPins[ROWS] = {32, 31, 30, 29, 28}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {35, 36, 37, 38, 34}; //connect to the column pinouts of the keypad
-
-Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
-
-
-#include "PSLoad.h"
-
-#include <movingAvgFloat.h>
-
-
-
-
-
-movingAvgFloat avgVoltCH1(10);
-movingAvgFloat avgAmpCH1(10);
-
-movingAvgFloat avgVoltCalCH1(50);
-movingAvgFloat avgAmpCH1Cal(50);
-
-movingAvgFloat* avgTypeCh1[] = { &avgVoltCH1, &avgAmpCH1, &avgVoltCalCH1, &avgAmpCH1Cal};
-//movingAvgFloat* avgTypeCh2[] = { &avgVoltCH2, &avgAmpCH2, &avgVoltCalCH2, &avgAmpCH2Cal};
-
-
-
-PSLoad Ch1(avgTypeCh1, &Serial1, DataOut1, DataOut2);
-
-//------------------------------------------------------------------------------------------------
-// Buzzer Timer
-#include <TimerThree.h>
-
-volatile uint32_t BzCount = 0;
-volatile uint32_t BzThr = 1000;
-
-
-void setup() 
-{
-
-  Timer3.initialize(1000);
-  Timer3.attachInterrupt(BuzzerISR); // blinkLED to run every 0.15 seconds
-  Timer3.stop();
-  Timer3.restart();
-  pinMode(Debug, BuzzerPin);
-  digitalWrite(BuzzerPin, LOW);
-
-
-
-  Ch1.init();
-
-  //Encoder
-  pinMode(RotClk, INPUT);
-  pinMode(RotDt, INPUT);
-  pinMode(RotBtn, INPUT_PULLUP);
-
-  attachInterrupt(digitalPinToInterrupt(RotBtn),  RotBtnISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(RotClk),  shaft_moved, CHANGE);
-  //------------------------------------------------------------------------------------------------
-
-  //Serial1.begin(1000000);
-
-  Serial.begin(1000000);
-
-  analogWriteFrequency(Fan, 25000);
-
-  pinMode(Debug, OUTPUT);
-
-  
-
-  
-  pinMode(DataOut1, OUTPUT);
-  pinMode(DataOut2, OUTPUT);
-
-
-
-  pinMode(InterrSW, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(InterrSW),  ModeSwISR, FALLING);
-
-  digitalWrite(DataOut1, LOW);
-  digitalWrite(DataOut2, LOW);
-
-  pinMode(DataIn2, INPUT);
-  attachInterrupt(DataIn2, ErrorCh1_ISR, RISING);
-
-  pinMode(DataIn1, INPUT);
-  attachInterrupt(DataIn1, DataReadyCH1, RISING);
-
-  tft.begin();
-  tft.setRotation(1);
-
-  tft.fillScreen(TFT_BLACK);
-
-}
-
-void BuzzerISR(void){
-  if (BzCount == BzThr){
-    digitalWrite(BuzzerPin, LOW);
-    Timer3.stop();
-  }
-  BzCount++;
-}
-
-void Buzzer(uint32_t buzzMS){
-  BzCount = 0;
-  BzThr = buzzMS;
-  Timer3.restart();
-  digitalWrite(BuzzerPin, HIGH);
-}
-
-
-void LoopPSload(){
-
-  Serial.println("enter PSLoad Func");
-
-  Ch1.initPSLoad();
-
-  while (mode == 0){                  //PSLoad normal mode
-    if (Ch1.DataReady)  Ch1.GetData();           // ~6 us
-    if (Ch1.DispData)   Ch1.dipsData();          //~5750 us
-
-
-    if (sendVolt) {
-      Ch1.dispSetData();
-      Ch1.SendData('v', Ch1.Vset);
-      sendVolt = 0;
-    }
-    if (sendCurrP) {
-      Ch1.dispSetData();
-      Ch1.SendData('i', Ch1.Ipset);
-      sendCurrP = 0;
-    }
-    if (sendCurrN) {
-      Ch1.SendData('s', Ch1.Inset);
-      Ch1.dispSetData();
-      sendCurrN = 0;
-    }
-
-    float keyreturn = checkKeys();                  //~ 1770 us  / or ~ 1 us
-    if (keyreturn != -1.0) Serial.println(keyreturn, 4);
-    processNumPad(keyreturn);
-
-
-    if (FanMetro.check())  FanContr();
-
-  /*
-    if (IoT.check()){
-      Serial.print("Volt: ");
-      Serial.print(VoltCH1,5);
-      Serial.print("  Amp: ");
-      Serial.print(AmpCH1,5);
-      Serial.print("  Temp: ");
-      Serial.println(temp1,1);
-    }
-  */
-
-  }       //while loop
-}         //function
-
-
-float factorSelV(void){
-  if (factor == 0) return 0.001;
-  if (factor == 1) return 0.01;
-  if (factor == 2) return 0.1;
-  if (factor == 3) return 1.0;
-  if (factor == 4) return 10.0;
-}
-
-float factorSelI(void){
-  if (factor == 0) return 0.0001;
-  if (factor == 1) return 0.001;
-  if (factor == 2) return 0.01;
-  if (factor == 3) return 0.1;
-  if (factor == 4) return 1.0;
-}
-
-void shaft_moved(){   //ISR
-  aState = digitalRead(RotClk);
-  
-  last_run = !last_run;
-  if(last_run == LOW){
-    if (digitalRead(RotDt) != aState)
-    {
-      if(ChannelSet == 0){                      //Set Ch1
-        if (SetType == 0){                      //Set Volts
-          Ch1.Vset = Ch1.Vset +  factorSelV();
-          sendVolt = 1;
-        }else if(SetType == 1){                 //Set I +
-          Ch1.Ipset = Ch1.Ipset + factorSelI();
-          sendCurrP = 1;
-        }else if(SetType == 2){                 //Set I +
-          Ch1.Inset = Ch1.Inset + factorSelI();
-          sendCurrN = 1;
-        }
-      }
-      if(ChannelSet == 1){                      //Set Ch2
-
-      }
-
-
-    }else{
-      if(ChannelSet == 0){                      //Set Ch1
-        if (SetType == 0){                      //Set Volts
-          Ch1.Vset = Ch1.Vset -  factorSelV();
-          sendVolt = 1;
-        }else if(SetType == 1){                 //Set I +
-          Ch1.Ipset = Ch1.Ipset - factorSelI();
-          sendCurrP = 1;
-        }else if(SetType == 2){                 //Set I +
-          Ch1.Inset = Ch1.Inset - factorSelI();
-          sendCurrN = 1;
-        }
-      }
-      if(ChannelSet == 1){                      //Set Ch2
-
-      }
-    }
-    Ch1.Vset = constrain(Ch1.Vset, 0.02, 25.0);
-    Ch1.Ipset = constrain(Ch1.Ipset, 0.000001, 5.0);
-    Ch1.Inset = constrain(Ch1.Inset, 0.000001, 5.0);
-  }
-}
+/*
+ESP32-1732S019 ARDUINO IDE 2.3.2 ESP32-S3, 1,9 zoll 170*320 
+*/
+#include <TFT_eSPI.h>     // by Bodmer ver 2.5.43
+//#include <NTPClient.h>    // by F.Weinberg ver 3.2.1
+//#include <HTTPClient.h>   // by A.McEwen ver 2.2.0
+//#include <ArduinoJson.h>  // by B.Blanchon ver 7.0.3
+/*
+In Linux copy this to ~/Arduino/libraries/TFT_eSPI/User_Setup.h
+And in Windows to C:\Users\YOR_USER_NAME\Documents\Arduino\libraries\TFT_eSPI\User_Setup.h
+*/
+#define ST7789_DRIVER  
+#define TFT_WIDTH 170
+#define TFT_HEIGHT 320
+#define TFT_MISO -1 
+#define TFT_MOSI 13   
+#define TFT_SCLK 12
+#define TFT_CS   10 
+#define TFT_DC   11 
+#define TFT_RST  1 
+#define TFT_BL   14
+#define TFT_BACKLIGHT_ON HIGH
+#define LOAD_GLCD  
+#define LOAD_FONT2 
+#define LOAD_FONT4 
+#define LOAD_FONT6 
+#define LOAD_FONT7
+#define LOAD_FONT8 
+#define LOAD_GFXFF 
+#define SMOOTH_FONT
+#define SPI_FREQUENCY  40000000
 
 /*
-float checkKeys(){      //~ 1770 us
+// prepare WiFi
+const char* ssid = "xxxxxxxxxxxxxxx";                                                 // Replace with your
+const char* password = "xxxxxxxxxx";                                                  // WiFi credentials
+// search your next airport here and get the ICAO code  "https://en.wikipedia.org/wiki/ICAO_airport_code"
+const char* metar = "https://aviationweather.gov/api/data/metar?ids=KDEN&format=json";// KDEN = Denver
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
+int wifiTimeOutCounter = 0;
+#define TIMEOFFSET -3600 * 5  // no daylight saving time
 
-  const byte MAX_CHARS = 9;
-  static char inputBuffer[MAX_CHARS];
-  static uint8_t inputIndex = 0;
-  static float floatTotal = 0;
-  static uint8_t intTotal;
+// init parameter for universe simulation
+int const n = 5, m = 200;
+float const r = 0.1;
+float x = 0, v = 0, t = 0;
+*/
+// definition for the screen
+#define MAX_Y 170
+#define MAX_X 320
+TFT_eSPI tft = TFT_eSPI();
+TFT_eSprite spr = TFT_eSprite(&tft);  // Declare Sprite object "spr" with pointer to "tft" object
+uint16_t palette[16] = { TFT_GREENYELLOW, TFT_NAVY, TFT_ORANGE, TFT_DARKCYAN, TFT_MAROON,
+                         TFT_PURPLE, TFT_PINK, TFT_LIGHTGREY, TFT_YELLOW, TFT_BLUE,
+                         TFT_GREEN, TFT_CYAN, TFT_RED, TFT_MAGENTA, TFT_BLUE, TFT_WHITE };
 
-  char key = keypad.getKey();
+// set global variables for the weather information
+int temperature = 0;  // °C
+int dew_point = 0;    // °C
+int wind_speed_knots = 0;
+int pressure = 0;           // hPa
+int relative_humidity = 0;  // %
+int wind_speed_kmh = 0;
+int data_age_min = 0;
+unsigned long epochTime = 0;
+unsigned long obsTime = 0;
 
-  //if (key >= '0'){
-    //Serial.print("key:  ");
-    //Serial.println(key);
-  //}
-  
-  //tft.setTextDatum(TL_DATUM);
-  //tft.setTextPadding(135);
-  //tft.drawChar(key, 10, 150, 4);
-  //tft.drawNumber(factor, 10, 170, 4);
+// update parameter for the weather data
+unsigned long previousMillis = 0;
+#define INTERVAL 60000 * 5   // 5 min
 
-  //if (key == 0) return;
-
-  if (key == 'H'){
-    factor++;
-    factor = constrain(factor, 0, 4);
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='G'){
-    factor--;
-    factor = constrain(factor, 0, 4);
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='E'){
-    Ch1.PwSet = !Ch1.PwSet;               //PowerToggle Ch1
-    if (Ch1.PwSet) Ch1.SendData('o');
-    else Ch1.SendData('f');
-    Serial.println("Power Toggle");
-    return -1.0;
-  }else if (key =='F'){
-                   //PowerToggle Ch2
-    return -1.0;
-  }else if (key =='J'){
-    ChannelSet = 0;
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='I'){
-    ChannelSet = 1;
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    return -1.0;
-  }else if (key =='K'){
-    return -1.0;
-  }else if (key =='L'){
-    Ch1.SendData('Y');
-    Serial.println("Request Data");
-    return -1.0;
-  }else if (key =='M'){
-    //if (digitalRead(InterrSW) == 0) mode = 1;       //Enter Cal Function
-    //Serial.println("why: ");
-    return -1.0;
-  }else if (key == 'A'){
-    SetType = 0;                        //Set V
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    //Serial.println("A");
-    return -1.0;
-
-  }else if (key == 'B'){
-    SetType = 1;                        //Set I+
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    //Serial.println("B");
-    return -1.0;
-
-  }else if (key == 'C'){
-    SetType = 2;                        //Set I-
-    //upDateUndLine = 1;
-    Ch1.underLine();
-    //Serial.println("C");
-    return -1.0;
-
-  }else if (key =='D'){
-    //Serial.println("D");
-    //SendDataToCh1('q', DAC1m);
-    //SendDataToCh1('w', DAC1b);
-    return -1.0;
+/*
+// connect to weather server and get data
+void weatherData() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(metar);
+    Serial.print("Sending HTTP request to: ");
+    Serial.println(metar);
+    int httpCode = http.GET();            // Send HTTP GET request
+    if (httpCode > 0) {                   // Check if the request was successful
+      DynamicJsonDocument doc(2048);      // Create JSON document (adjust the size accordingly)
+      String payload = http.getString();  // Retrieve response from the website
+      Serial.print("Response received: ");
+      Serial.println(payload);                                     // Output METAR data to the Serial Console
+      DeserializationError error = deserializeJson(doc, payload);  // Parse JSON data
+      if (!error) {
+        // start extracting weather data and update global variables
+        temperature = doc[0]["temp"];
+        dew_point = doc[0]["dewp"];
+        wind_speed_knots = doc[0]["wspd"];
+        pressure = doc[0]["altim"];
+        obsTime = doc[0]["obsTime"];
+        relative_humidity = 100 * expf(17.625f * dew_point / (243.04f + dew_point)) / expf(17.625f * temperature / (243.04f + temperature));
+        wind_speed_kmh = wind_speed_knots * 1.852f;
+        epochTime = timeClient.getEpochTime() - TIMEOFFSET;
+        data_age_min = (epochTime - obsTime) / 60;
+        // show most important data on serial
+        Serial.print("Temperature: ");
+        Serial.print(temperature, 0);
+        Serial.println();
+        Serial.print("Relative Humidity: ");
+        Serial.print(relative_humidity, 0);
+        Serial.println("%");
+        Serial.print("Wind Speed: ");
+        Serial.print(wind_speed_kmh, 0);
+        Serial.println("km/h");
+        Serial.print("Pressure: ");
+        Serial.print(pressure, 0);
+        Serial.println("hPa");
+        Serial.print("Data age: ");
+        Serial.print((epochTime - obsTime) / 60);
+        Serial.println("min");
+      } else Serial.println("Error parsing JSON data");
+    } else Serial.println("Error retrieving METAR data");
+    http.end();
   }
-  
-  if (key == '#') //user signal that entry has finished
-  {
-    //Serial.println();
-    //Serial.println("entry is complete");
-    floatTotal = atof(inputBuffer);  //convert buffer to a float
-    //Serial.println(floatTotal, 3);
-    //floatTotal = 0;
-    inputIndex = 0;
+}
 
-    tft.setTextDatum(TR_DATUM);
-    tft.setTextPadding(112);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("", 150, 120, 4);
 
-    return floatTotal; //exit the function
+
+// this is missing in the library
+String getFormattedDate() {
+#define LEAP_YEAR(Y) ((Y > 0) && !(Y % 4) && ((Y % 100) || !(Y % 400)))
+  unsigned long rawTime = timeClient.getEpochTime() / 86400L;
+  unsigned long days = 0, year = 1970;
+  uint8_t month;
+  static const uint8_t monthDays[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+  while ((days += (LEAP_YEAR(year) ? 366 : 365)) <= rawTime) year++;
+  rawTime -= days - (LEAP_YEAR(year) ? 366 : 365);
+  for (month = 0; month < 12; month++) {
+    uint8_t monthLength;
+    if (month == 1) monthLength = LEAP_YEAR(year) ? 29 : 28;
+    else monthLength = monthDays[month];
+    if (rawTime < monthLength) break;
+    rawTime -= monthLength;
   }
-  if (key >= '0' && key <= '9' || key == '.') //only act on numeric or '.' keys
-  {
-    inputBuffer[inputIndex] = key;  //put the key value in the buffer
-    if (inputIndex != MAX_CHARS - 1)
-    {
-      inputIndex++; //increment the array
-    }
-    inputBuffer[inputIndex] = '\0';  //terminate the string
-
-    tft.setTextDatum(TR_DATUM);
-    tft.setTextPadding(112);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString(inputBuffer, 150, 120, 4);
-    //Serial.print("inputBuffer:  ");
-    //Serial.println(inputBuffer);
-
-
-    return -1.0;
-  }
+  String monthStr = ++month < 10 ? "0" + String(month) : String(month);
+  String dayStr = ++rawTime < 10 ? "0" + String(rawTime) : String(rawTime);
+  return String(dayStr) + "-" + monthStr + "-" + year;
 }
 */
-
-float checkKeys(){      //~ 1770 us  / or ~ 1 us
-  float Return = -1.0;
-
-  const byte MAX_CHARS = 9;
-  static char inputBuffer[MAX_CHARS];
-  static uint8_t inputIndex = 0;
-  static float floatTotal = 0;
-  static uint8_t intTotal;
-
-  char key = keypad.getKey();
-
-  //Serial.println(key, HEX);
-
-  //if (key != 0x00){
-  //  Serial.print("key:  ");
-  //  Serial.println(key);
-  //}
-
-  if (key == 0x00) return -1.0;
-  
-  switch (key){
-    case 'H':
-      factor++;
-      factor = constrain(factor, 0, 4);
-      //upDateUndLine = 1;
-      Ch1.underLine();
-      Return = -1.0;
-      break;
-
-    case 'G':
-      factor--;
-      factor = constrain(factor, 0, 4);
-      //upDateUndLine = 1;
-      Ch1.underLine();
-      Return = -1.0;
-      break;
-
-    case 'E':
-      Ch1.PwSet = !Ch1.PwSet;               //PowerToggle Ch1
-      if (Ch1.PwSet) Ch1.SendData('o');
-      else Ch1.SendData('f');
-      Serial.println("Power Toggle");
-      Return = -1.0;
-      break;
-
-    case 'F':
-      Return = -1.0;               //PowerToggle Ch2
-      break;
-
-    case 'J':
-      ChannelSet = 0;
-      //upDateUndLine = 1;
-      Ch1.underLine();
-      Return = -1.0;
-      break;
-
-    case 'I':
-      ChannelSet = 1;
-      //upDateUndLine = 1;
-      Ch1.underLine();
-      Return = -1.0;
-      break;
-
-    case 'K':
-      Return = -1.0;
-      break;
-
-    case 'L':
-      Ch1.SendData('Y');
-      Serial.println("Request Data");
-      Return = -1.0;
-      break;
-
-    case 'M':
-      // if (digitalRead(InterrSW) == 0) mode = 1;       // Enter Cal Function
-      // Serial.println("why: ");
-      Return = -1.0;
-      break;
-
-    case 'A':
-      SetType = 0;                        // Set V
-      // upDateUndLine = 1;
-      Ch1.underLine();
-      // Serial.println("A");
-      Return = -1.0;
-      break;
-
-    case 'B':
-      SetType = 1;                        // Set I+
-      // upDateUndLine = 1;
-      Ch1.underLine();
-      // Serial.println("B");
-      Return = -1.0;
-      break;
-
-    case 'C':
-      SetType = 2;                        // Set I-
-      // upDateUndLine = 1;
-      Ch1.underLine();
-      // Serial.println("C");
-      Return = -1.0;
-      break;
-
-    case 'D':
-      // Serial.println("D");
-      // SendDataToCh1('q', DAC1m);
-      // SendDataToCh1('w', DAC1b);
-      Return = -1.0;
-      break;
-
-    case '#': // user signal that entry has finished
-      // Serial.println();
-      // Serial.println("entry is complete");
-      floatTotal = atof(inputBuffer);  // convert buffer to a float
-      // Serial.println(floatTotal, 3);
-      // floatTotal = 0;
-      inputIndex = 0;
-
-      tft.setTextDatum(TR_DATUM);
-      tft.setTextPadding(112);
-      tft.setTextColor(TFT_WHITE, TFT_BLACK);
-      tft.drawString("", 150, 120, 4);
-
-      Return = floatTotal; // exit the function
-      break;
-
-    default:
-      if ((key >= '0' && key <= '9') || key == '.') { // only act on numeric or '.' keys
-        inputBuffer[inputIndex] = key;  // put the key value in the buffer
-        if (inputIndex != MAX_CHARS - 1) {
-          inputIndex++; // increment the array
-        }
-        inputBuffer[inputIndex] = '\0';  // terminate the string
-
-        tft.setTextDatum(TR_DATUM);
-        tft.setTextPadding(112);
-        tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.drawString(inputBuffer, 150, 120, 4);
-        // Serial.print("inputBuffer:  ");
-        // Serial.println(inputBuffer);
-
-        Return = -1.0;
-      }
-      break;
-  }
-
-  
-
-  return Return;
-}
-
-void FanContr(void){
-  float maxTemp = Ch1.temp1;
-  if (maxTemp < Ch1.temp2) maxTemp = Ch1.temp2;
-  uint16_t PWM;
-  if (maxTemp <= 35.0) PWM = 0;
-  else if (maxTemp > 35.0) PWM = 15.0 * maxTemp - 380.0;
-  PWM = constrain(PWM, 0, 255);
-
-  analogWrite(Fan, PWM);
-
-  uint16_t PWMperct = PWM * 100 / 255;
-
-  //Serial.print("PWM: ");
-  //Serial.println(mode);
-  //Serial.print("  perct: ");
-  //Serial.println(PWMperct);
-
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextPadding(60);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawNumber(PWMperct, 200, 0, 2);
-
-  tft.setTextDatum(TL_DATUM);
-  tft.setTextPadding(60);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.drawFloat(Ch1.temp1, 1, 0, 0, 2);
-  tft.drawFloat(Ch1.temp2, 1, 60, 0, 2);
-}
-
-void processNumPad(float num){
-  if (num == -1.0) return;
-  
-  if(ChannelSet == 0){                      //Set Ch1
-    if (SetType == 0){                      //Set Volts
-      num = constrain(num, 0.01, 25.0);
-      Ch1.Vset = num;
-      sendVolt = 1;
-    }else if(SetType == 1){                 //Set I +
-      num = constrain(num, 0.000001, 5.0);
-      Ch1.Ipset = num;
-      sendCurrP = 1;
-    }else if(SetType == 2){                 //Set I +
-      num = constrain(num, 0.000001, 5.0);
-      Ch1.Inset = num;
-      sendCurrN = 1;
-    }
-  }
-  if(ChannelSet == 1){                      //Set Ch2
-
-  }
+void setup() {
+  // entry point
+  Serial.begin(115200);
+  while (!Serial) delay(10);
+  Serial.println("Booting...");
+  // print debug infos on serial
+  uint32_t chipId = 0;
+  for (int i = 0; i < 17; i = i + 8) chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+  Serial.printf("ESP32 Chip model = %s Rev %d\n", ESP.getChipModel(), ESP.getChipRevision());
+  Serial.printf("This chip has %d cores\n", ESP.getChipCores());
+  Serial.print("Chip ID: ");
+  Serial.println(chipId);
+  Serial.print("Connecting to ");
+  //tft.init();
 }
 
 void loop() {
-  if (mode == 0) LoopPSload();
-  if (mode == 1) Ch1.CalMode();
-
-}
-
-void ModeSwISR(){       //ISR
-  //mode = !mode;
-  mode = 1;
-}
-
-void DataReadyCH1(void){  //ISR
-  Ch1.DataReady = 1;
-}
-
-void RotBtnISR(){   //ISR
-  //sendData = 1;
-}
-
-void ErrorCh1_ISR(void){
-  Buzzer(2000);
+  
 }
