@@ -78,7 +78,7 @@
 
   Metro FanMetro = Metro(250);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
 
-  //Metro IoT = Metro(1000);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
+  Metro IoT = Metro(1000);            // Instanciate a metro object and set the interval to 250 milliseconds (0.25 seconds).
 
   //------------------------------------------------------------------------------------------------
   #include <Keypad.h>
@@ -241,16 +241,35 @@ void LoopPSload(){
 
     if (FanMetro.check())  FanContr();              // 450 us
 
-  /*
-    if (IoT.check()){
-      Serial.print("Volt: ");
-      Serial.print(VoltCH1,5);
+
+
+    if (IoT.check()){                     //Gets Called every 1000 ms
+      Serial.print("Volt: ");             //Send Voltage, Current and Temperatur to Raspberry Pi
+      Serial.print(Ch1.Volt,5);
       Serial.print("  Amp: ");
-      Serial.print(AmpCH1,5);
+      Serial.print(Ch1.Amp,5);
       Serial.print("  Temp: ");
-      Serial.println(temp1,1);
+      Serial.println(Ch1.temp1,1);
     }
-  */
+
+    while (Serial.available() > 0){       //Recieve Data form Raspberry Pi
+      char first = Serial.read();
+      if (first == 'V'){                  //Get set voltage Value
+        Ch1.Vset = Serial.parseFloat();
+        Ch1.SendData('v', Ch1.Vset);
+        Ch1.dispSetData();
+      }
+      if (first == 'O'){                  //Send kommand to turn Powersupply on
+        digitalWrite(DataOut1, HIGH);
+        Serial1.print("o");
+        digitalWrite(DataOut1, LOW);
+      }
+      if (first == 'F'){                  //Send kommand to turn Powersupply off
+        digitalWrite(DataOut1, HIGH);
+        Serial1.print("f");
+        digitalWrite(DataOut1, LOW);
+      }
+    }
 
   }       //while loop
 }         //function

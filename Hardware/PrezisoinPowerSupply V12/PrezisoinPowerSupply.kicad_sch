@@ -4,6 +4,10 @@
 	(generator_version "8.0")
 	(uuid "29e23d3f-5497-45d7-9b61-dc69987ec96b")
 	(paper "A2")
+	(title_block
+		(title "PSLoad")
+		(company "Jannik Schreiber")
+	)
 	(lib_symbols
 		(symbol "+5V_1"
 			(power)
@@ -15098,16 +15102,6 @@
 		)
 		(uuid "0022532e-9a47-4cbb-947a-b65efbe94485")
 	)
-	(text "Vss, Vdd\nlow offset\n"
-		(exclude_from_sim no)
-		(at 314.96 82.55 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-		(uuid "0678e7be-76b3-4949-aadf-ac1f678d43ad")
-	)
 	(text "any IO"
 		(exclude_from_sim no)
 		(at 98.425 111.125 0)
@@ -15131,7 +15125,7 @@
 	)
 	(text "LSB 0,000 000 596 ..."
 		(exclude_from_sim no)
-		(at 154.94 190.5 0)
+		(at 84.582 218.186 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -15148,16 +15142,6 @@
 			)
 		)
 		(uuid "2b585ca3-e59d-41ca-8eef-ec7ec6b4d4fc")
-	)
-	(text "Vss, Vdd\nno prezision\n"
-		(exclude_from_sim no)
-		(at 300.355 150.495 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-		(uuid "362908c3-282b-45d4-aba4-fee822ca027d")
 	)
 	(text "any IO"
 		(exclude_from_sim no)
@@ -15202,7 +15186,7 @@
 	)
 	(text "-5A +5A\n2,5V 0V"
 		(exclude_from_sim no)
-		(at 114.3 155.575 0)
+		(at 117.094 168.148 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -15213,7 +15197,7 @@
 	)
 	(text "V mes \nLSB 100uV\nmax 25, 000 0 V"
 		(exclude_from_sim no)
-		(at 146.685 46.355 0)
+		(at 149.86 59.309 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -15224,7 +15208,7 @@
 	)
 	(text "V set\nLSB 1 mV\nmax 25 V"
 		(exclude_from_sim no)
-		(at 146.685 55.88 0)
+		(at 149.86 68.834 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -15235,7 +15219,7 @@
 	)
 	(text "Gain x10\nin +- 0,25V\nout +- 2,5V"
 		(exclude_from_sim no)
-		(at 371.475 137.16 0)
+		(at 371.348 137.922 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -15244,19 +15228,9 @@
 		)
 		(uuid "b13a60d7-d184-42ca-ab01-468bffc92529")
 	)
-	(text "Vss, Vdd\nlow offset\nmatched R\n"
-		(exclude_from_sim no)
-		(at 278.13 65.405 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-		(uuid "d44c7cb8-7d16-4df0-97ba-9757487924bf")
-	)
 	(text "I mes\nLSB 10uA\nmax 5,000 00"
 		(exclude_from_sim no)
-		(at 169.545 46.355 0)
+		(at 172.72 59.309 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -15277,7 +15251,7 @@
 	)
 	(text "I set\nLSB 1 mA (100 uA)\nmax 5 A"
 		(exclude_from_sim no)
-		(at 169.545 55.88 0)
+		(at 172.72 68.834 0)
 		(effects
 			(font
 				(size 1.27 1.27)

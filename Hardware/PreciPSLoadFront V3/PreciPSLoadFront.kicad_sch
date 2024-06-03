@@ -3,7 +3,7 @@
 	(generator "eeschema")
 	(generator_version "8.0")
 	(uuid "b6959339-f985-4b73-a4df-a60bdf1169e5")
-	(paper "A3")
+	(paper "A4")
 	(lib_symbols
 		(symbol "Connector:Conn_01x02_Pin"
 			(pin_names
@@ -10021,7 +10021,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_01x03_Pin")
-		(at 211.455 167.005 270)
+		(at 241.3 140.97 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10030,7 +10030,7 @@
 		(fields_autoplaced yes)
 		(uuid "05c5d33f-d775-4bd0-9e80-25ea7b342481")
 		(property "Reference" "J7"
-			(at 211.455 162.56 90)
+			(at 241.3 136.525 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10038,7 +10038,7 @@
 			)
 		)
 		(property "Value" "ExtPw"
-			(at 211.455 165.1 90)
+			(at 241.3 139.065 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10046,7 +10046,7 @@
 			)
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical"
-			(at 211.455 167.005 0)
+			(at 241.3 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10055,7 +10055,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 211.455 167.005 0)
+			(at 241.3 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10064,7 +10064,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated"
-			(at 211.455 167.005 0)
+			(at 241.3 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15843,7 +15843,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 208.915 172.085 180)
+		(at 238.76 146.05 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -15851,7 +15851,7 @@
 		(dnp no)
 		(uuid "c7b450d1-0879-4e1d-9eb6-0723935a215a")
 		(property "Reference" "#PWR033"
-			(at 208.915 168.275 0)
+			(at 238.76 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15860,7 +15860,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 207.645 177.8 0)
+			(at 237.49 151.765 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15868,7 +15868,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 208.915 172.085 0)
+			(at 238.76 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15877,7 +15877,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 208.915 172.085 0)
+			(at 238.76 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -15886,7 +15886,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 208.915 172.085 0)
+			(at 238.76 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16476,7 +16476,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 213.995 172.085 0)
+		(at 243.84 146.05 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16485,7 +16485,7 @@
 		(fields_autoplaced yes)
 		(uuid "e68a6521-5871-4873-bfdb-a5b6dc6f9105")
 		(property "Reference" "#PWR03"
-			(at 213.995 178.435 0)
+			(at 243.84 152.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16494,7 +16494,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 213.995 176.53 0)
+			(at 243.84 150.495 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16503,7 +16503,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 213.995 172.085 0)
+			(at 243.84 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16512,7 +16512,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 213.995 172.085 0)
+			(at 243.84 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16521,7 +16521,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 213.995 172.085 0)
+			(at 243.84 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16811,7 +16811,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 211.455 172.085 180)
+		(at 241.3 146.05 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16819,7 +16819,7 @@
 		(dnp no)
 		(uuid "f52ac97d-92f1-4045-b8e9-d5ee7d36aca3")
 		(property "Reference" "#PWR045"
-			(at 211.455 168.275 0)
+			(at 241.3 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16828,7 +16828,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 212.09 177.8 0)
+			(at 241.935 151.765 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16836,7 +16836,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 211.455 172.085 0)
+			(at 241.3 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16845,7 +16845,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 211.455 172.085 0)
+			(at 241.3 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16854,7 +16854,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 211.455 172.085 0)
+			(at 241.3 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17021,7 +17021,7 @@
 		(dnp no)
 		(uuid "fe1520ce-0d49-4538-810b-246054e5f76a")
 		(property "Reference" "J4"
-			(at 24.765 12.065 0)
+			(at 18.796 28.448 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17029,7 +17029,7 @@
 			)
 		)
 		(property "Value" "Display"
-			(at 24.765 14.605 0)
+			(at 18.796 30.988 0)
 			(effects
 				(font
 					(size 1.27 1.27)
