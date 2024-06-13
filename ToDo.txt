@@ -1,3 +1,4 @@
+Software:
 						Module		Front		complete
 
 validate Cal (tweek)						+
@@ -13,3 +14,8 @@ Clean Up Funct. for 2. Ch. (C++)				+		(#)
 Test touch							+
 
 
+
+Hardware:
+						Module		Front		complete
+
+one connector for led and sense			+
