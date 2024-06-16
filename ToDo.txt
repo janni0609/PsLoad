@@ -19,3 +19,7 @@ Hardware:
 						Module		Front		complete
 
 one connector for led and sense			+
+
+USB C updi & uart --> switch			+
+
+improove gnd					+
