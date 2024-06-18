@@ -7099,168 +7099,6 @@
 				)
 			)
 		)
-		(symbol "Diode:1N4148WS"
-			(pin_numbers hide)
-			(pin_names hide)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "D"
-				(at 0 2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "1N4148WS"
-				(at 0 -2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" "Diode_SMD:D_SOD-323"
-				(at 0 -4.445 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "https://www.vishay.com/docs/85751/1n4148ws.pdf"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "75V 0.15A Fast switching Diode, SOD-323"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Sim.Device" "D"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Sim.Pins" "1=K 2=A"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "diode"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "D*SOD?323*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "1N4148WS_0_1"
-				(polyline
-					(pts
-						(xy -1.27 1.27) (xy -1.27 -1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy -1.27 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "1N4148WS_1_1"
-				(pin passive line
-					(at -3.81 0 0)
-					(length 2.54)
-					(name "K"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 3.81 0 180)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
 		(symbol "Diode:BAV99"
 			(pin_names hide)
 			(exclude_from_sim no)
@@ -13116,6 +12954,16 @@
 	)
 	(wire
 		(pts
+			(xy 80.01 128.27) (xy 115.57 128.27)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2676772b-c550-46f5-aa20-33980b953d38")
+	)
+	(wire
+		(pts
 			(xy 483.235 111.125) (xy 483.235 139.7)
 		)
 		(stroke
@@ -13913,6 +13761,16 @@
 			(type default)
 		)
 		(uuid "51a2d6ec-6f50-48bf-b1b8-b64449638f66")
+	)
+	(wire
+		(pts
+			(xy 86.36 240.665) (xy 99.695 240.665)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "51cf0097-3b30-4867-bb21-66b81c15ae4c")
 	)
 	(wire
 		(pts
@@ -14726,6 +14584,16 @@
 	)
 	(wire
 		(pts
+			(xy 86.36 243.205) (xy 110.49 243.205)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7d67eb94-75a7-46b1-8524-d7dd42721ae7")
+	)
+	(wire
+		(pts
 			(xy 376.555 111.76) (xy 373.38 111.76)
 		)
 		(stroke
@@ -14973,6 +14841,16 @@
 			(type default)
 		)
 		(uuid "86265d9e-2297-4aac-be6f-18771737ccf7")
+	)
+	(wire
+		(pts
+			(xy 110.49 240.665) (xy 107.315 240.665)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8709db1b-cf61-4e47-95eb-6bad85f7c31a")
 	)
 	(wire
 		(pts
@@ -15906,6 +15784,16 @@
 	)
 	(wire
 		(pts
+			(xy 110.49 243.205) (xy 110.49 240.665)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c16001e6-fa1a-4789-8a37-61f41522e49a")
+	)
+	(wire
+		(pts
 			(xy 410.845 177.165) (xy 441.325 177.165)
 		)
 		(stroke
@@ -16203,6 +16091,16 @@
 			(type default)
 		)
 		(uuid "d5e4f154-a434-4151-a00f-1a48bb9489aa")
+	)
+	(wire
+		(pts
+			(xy 80.01 128.27) (xy 80.01 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d5e91b0c-9457-44df-96b7-6a310811ccca")
 	)
 	(wire
 		(pts
@@ -17673,7 +17571,7 @@
 	)
 	(global_label "RESET"
 		(shape input)
-		(at 194.31 311.785 180)
+		(at 172.085 311.785 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -17683,7 +17581,7 @@
 		)
 		(uuid "47d147f0-d3ac-4ccb-89da-cf5a0a2b7e0d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 185.5797 311.785 0)
+			(at 163.3547 311.785 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17711,28 +17609,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "DAC Reset"
-		(shape input)
-		(at 224.79 291.465 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "4ab701e6-cb81-4114-b7e5-fe4dbacdd87b")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 237.5724 291.465 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
 				(hide yes)
 			)
 		)
@@ -17915,7 +17791,7 @@
 	)
 	(global_label "2,5Vref"
 		(shape input)
-		(at 77.47 118.745 270)
+		(at 73.025 110.49 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -17925,7 +17801,7 @@
 		)
 		(uuid "79ae1569-0cc9-4c7c-be7a-65f2f96a75ff")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 77.47 128.4431 90)
+			(at 73.025 120.1881 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18283,28 +18159,6 @@
 					(size 1.27 1.27)
 				)
 				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "DAC Reset"
-		(shape input)
-		(at 115.57 128.27 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "b2773fac-6da6-430e-bcb5-81b39c61bbb3")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 102.7876 128.27 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
 				(hide yes)
 			)
 		)
@@ -18674,6 +18528,28 @@
 		(uuid "f1a0c8b0-899b-4be5-bf13-0c3789fa66c3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 235.0322 314.325 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "UPDI"
+		(shape input)
+		(at 110.49 240.665 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f4aab4a1-cb70-4a5b-a077-4af34e25a504")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 117.9505 240.665 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -24848,7 +24724,7 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint_Alt")
-		(at 77.47 118.745 0)
+		(at 73.025 110.49 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -24857,7 +24733,7 @@
 		(fields_autoplaced yes)
 		(uuid "4dbde320-8430-4ce3-9354-5442320c2639")
 		(property "Reference" "TP32"
-			(at 80.01 114.1729 0)
+			(at 75.565 105.9179 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -24866,7 +24742,7 @@
 			)
 		)
 		(property "Value" "Vref"
-			(at 80.01 116.7129 0)
+			(at 75.565 108.4579 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -24875,7 +24751,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 82.55 118.745 0)
+			(at 78.105 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -24884,7 +24760,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 82.55 118.745 0)
+			(at 78.105 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -24893,7 +24769,7 @@
 			)
 		)
 		(property "Description" "test point (alternative shape)"
-			(at 77.47 118.745 0)
+			(at 73.025 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -26766,6 +26642,73 @@
 			(project "PrezisoinPowerSupply"
 				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
 					(reference "C48")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 80.01 130.81 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "61c94f41-827d-4000-a769-5f19633d9562")
+		(property "Reference" "#PWR0138"
+			(at 80.01 137.16 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 80.01 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" ""
+			(at 80.01 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 80.01 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 80.01 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ea08856b-d58d-47cf-b75f-952227ade5c6")
+		)
+		(instances
+			(project "PrezisoinPowerSupply"
+				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
+					(reference "#PWR0138")
 					(unit 1)
 				)
 			)
@@ -32750,33 +32693,18 @@
 		)
 	)
 	(symbol
-		(lib_id "Diode:1N4148WS")
-		(at 98.425 243.205 0)
+		(lib_name "+5V_1")
+		(lib_id "power:+5V")
+		(at 172.085 311.785 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "a7e8eca8-fe76-4701-b81f-a5c4f0ff49cb")
-		(property "Reference" "D9"
-			(at 98.425 237.49 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1N4148WS"
-			(at 98.425 240.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SOD-323"
-			(at 98.425 247.65 0)
+		(uuid "a7cb3c2b-fb5a-4cfd-a287-7e9cb246108e")
+		(property "Reference" "#PWR0139"
+			(at 172.085 315.595 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -32784,8 +32712,16 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.vishay.com/docs/85751/1n4148ws.pdf"
-			(at 98.425 243.205 0)
+		(property "Value" "+5V"
+			(at 172.085 306.705 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 172.085 311.785 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -32793,8 +32729,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "75V 0.15A Fast switching Diode, SOD-323"
-			(at 98.425 243.205 0)
+		(property "Datasheet" ""
+			(at 172.085 311.785 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -32802,34 +32738,22 @@
 				(hide yes)
 			)
 		)
-		(property "Sim.Device" "D"
-			(at 98.425 243.205 0)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 172.085 311.785 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
-		)
-		(property "Sim.Pins" "1=K 2=A"
-			(at 98.425 243.205 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "0fa5781f-32a5-4701-9224-4e2efdde15ab")
 		)
 		(pin "1"
-			(uuid "98206cae-22f5-476c-9512-5d7f329f8264")
+			(uuid "8d39a6ca-3f4b-4e87-a6f0-313c48ff48f4")
 		)
 		(instances
-			(project ""
+			(project "PrezisoinPowerSupply"
 				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
-					(reference "D9")
+					(reference "#PWR0139")
 					(unit 1)
 				)
 			)
@@ -34111,6 +34035,73 @@
 			(project "PrezisoinPowerSupply"
 				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
 					(reference "C9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 103.505 240.665 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b39db405-4ecf-4fe7-80ba-2f6c19407da8")
+		(property "Reference" "R52"
+			(at 103.505 238.76 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "5,1k"
+			(at 103.505 242.57 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 103.505 238.887 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 103.505 240.665 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 103.505 240.665 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "dcaca834-7a78-47b9-975c-205819c79b4c")
+		)
+		(pin "2"
+			(uuid "ef09637c-3b2b-4473-9be7-bc8703e8637a")
+		)
+		(instances
+			(project "PrezisoinPowerSupply"
+				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
+					(reference "R52")
 					(unit 1)
 				)
 			)
