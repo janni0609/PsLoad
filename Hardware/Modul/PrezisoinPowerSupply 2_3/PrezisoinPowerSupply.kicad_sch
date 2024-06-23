@@ -16361,6 +16361,16 @@
 	)
 	(wire
 		(pts
+			(xy 46.99 224.79) (xy 48.26 224.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "65c463bb-9b14-4995-b176-805e3993ba47")
+	)
+	(wire
+		(pts
 			(xy 368.3 94.615) (xy 368.3 92.71)
 		)
 		(stroke
@@ -16368,6 +16378,16 @@
 			(type default)
 		)
 		(uuid "66613605-8185-4f45-a0ca-3322186bdbc2")
+	)
+	(wire
+		(pts
+			(xy 48.26 224.79) (xy 48.26 224.155)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "66e297b2-1fe2-417e-9f54-e4aba035c45f")
 	)
 	(wire
 		(pts
@@ -16821,7 +16841,7 @@
 	)
 	(wire
 		(pts
-			(xy 86.36 243.205) (xy 110.49 243.205)
+			(xy 86.36 243.205) (xy 107.95 243.205)
 		)
 		(stroke
 			(width 0)
@@ -17081,7 +17101,7 @@
 	)
 	(wire
 		(pts
-			(xy 110.49 240.665) (xy 107.315 240.665)
+			(xy 119.38 240.665) (xy 107.315 240.665)
 		)
 		(stroke
 			(width 0)
@@ -17671,6 +17691,16 @@
 	)
 	(wire
 		(pts
+			(xy 115.57 243.205) (xy 119.38 243.205)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a6d3d001-77d3-4bc9-b04e-05cc2602e53c")
+	)
+	(wire
+		(pts
 			(xy 449.58 92.71) (xy 463.55 92.71)
 		)
 		(stroke
@@ -18161,7 +18191,7 @@
 	)
 	(wire
 		(pts
-			(xy 110.49 243.205) (xy 110.49 240.665)
+			(xy 119.38 243.205) (xy 119.38 240.665)
 		)
 		(stroke
 			(width 0)
@@ -21073,7 +21103,7 @@
 	)
 	(global_label "UPDI"
 		(shape input)
-		(at 110.49 240.665 0)
+		(at 119.38 240.665 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -21083,7 +21113,7 @@
 		)
 		(uuid "f4aab4a1-cb70-4a5b-a077-4af34e25a504")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 117.9505 240.665 0)
+			(at 126.8405 240.665 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -21977,6 +22007,73 @@
 			(project "PrezisoinPowerSupply"
 				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
 					(reference "TP12")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Jumper:SolderJumper_2_Open")
+		(at 48.26 220.345 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "0c4b8aa4-62a5-4125-aca8-ecab692022ff")
+		(property "Reference" "JP2"
+			(at 46.355 220.345 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "USB PW Link"
+			(at 50.165 220.345 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm"
+			(at 48.26 220.345 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 48.26 220.345 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Solder Jumper, 2-pole, open"
+			(at 48.26 220.345 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b0e7ea8a-bb32-4d29-84ef-213ba47c84b4")
+		)
+		(pin "2"
+			(uuid "dd65a4a0-fa93-440d-9e7c-30de23aca253")
+		)
+		(instances
+			(project "PrezisoinPowerSupply"
+				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
+					(reference "JP2")
 					(unit 1)
 				)
 			)
@@ -36212,6 +36309,73 @@
 		)
 	)
 	(symbol
+		(lib_name "+5V_1")
+		(lib_id "power:+5V")
+		(at 48.26 216.535 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a4b24740-8e23-4d92-aaf4-07b60891411e")
+		(property "Reference" "#PWR0152"
+			(at 48.26 220.345 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+5V"
+			(at 48.26 211.455 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 48.26 216.535 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 48.26 216.535 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 48.26 216.535 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "29e85daf-1345-4651-8b7d-03f676c3a929")
+		)
+		(instances
+			(project "PrezisoinPowerSupply"
+				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
+					(reference "#PWR0152")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 128.27 138.43 0)
 		(unit 1)
@@ -41530,6 +41694,73 @@
 			(project "PrezisoinPowerSupply"
 				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
 					(reference "R40")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 111.76 243.205 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d3f1a2fb-c445-4d15-a9c1-49d0777858e4")
+		(property "Reference" "R57"
+			(at 111.76 241.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100"
+			(at 111.76 245.11 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 111.76 241.427 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 111.76 243.205 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 111.76 243.205 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6e8cf5eb-07f9-4016-8208-6d038864f5c5")
+		)
+		(pin "2"
+			(uuid "04d40744-1d7a-42dd-aaa4-9f75cacd0832")
+		)
+		(instances
+			(project "PrezisoinPowerSupply"
+				(path "/29e23d3f-5497-45d7-9b61-dc69987ec96b"
+					(reference "R57")
 					(unit 1)
 				)
 			)
