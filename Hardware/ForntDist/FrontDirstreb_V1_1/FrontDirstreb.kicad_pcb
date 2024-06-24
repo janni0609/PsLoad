@@ -927,7 +927,7 @@
 		(descr "JST GH series connector, BM10B-GHS-TBT (http://www.jst-mfg.com/product/pdf/eng/eGH.pdf), generated with kicad-footprint-generator")
 		(tags "connector JST GH vertical")
 		(property "Reference" "J10"
-			(at 0 -4 360)
+			(at 0 -4 0)
 			(layer "F.SilkS")
 			(uuid "5257ebe8-cee1-49f7-8fe1-00d443d024eb")
 			(effects
@@ -938,7 +938,7 @@
 			)
 		)
 		(property "Value" "Conn_01x10_Socket"
-			(at 0 4 360)
+			(at 0 4 0)
 			(layer "F.Fab")
 			(uuid "59ca7821-578c-4e8d-a7f1-8610aa394375")
 			(effects
@@ -1553,7 +1553,7 @@
 			(uuid "f6b5c1c2-3eaf-4469-8021-31d1ecc6949e")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 -1.5 360)
+			(at 0 -1.5 0)
 			(layer "F.Fab")
 			(uuid "1ff7d12a-cc4a-4836-bb5f-006afb4a6698")
 			(effects
