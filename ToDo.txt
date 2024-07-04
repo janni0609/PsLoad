@@ -11,6 +11,9 @@ Start Capacity Meas. (RTC)			+		(+)		(#)
 
 Test touch							+
 
+NumberPad Delete				+
+
+NumberPad Check for double ,,,,			+
 
 
 
