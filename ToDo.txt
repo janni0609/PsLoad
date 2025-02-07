@@ -1,7 +1,7 @@
 Software:
 						Module		Front		complete
 
-validate Cal (tweek)						+
+validate Cal (tweek)				+		+
 
 OTP	send status to Front			+		+
 
@@ -14,6 +14,8 @@ Test touch							+
 NumberPad Delete				+
 
 NumberPad Check for double ,,,,			+
+
+Source Sink Pos/Neg disp error			+?		+?
 
 
 
