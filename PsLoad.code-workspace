@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "PSLoadFrontio",
+			"path": "PSLoadFrontio"
+		},
+		{
+			"name": "PSLoadModulio",
+			"path": "PSLoadModulio"
+		},
+		{
+			"name": "PsLoad (root)",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
