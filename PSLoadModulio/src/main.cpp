@@ -5,6 +5,7 @@
 
 void CheckSerialRx();
 void Zero(double * array, int size);
+void ValidateCal(double * array, int size);
 void SendArray(char prefix, double array[]);
 void SendDebug(uint32_t data);
 void ReadData();
@@ -81,7 +82,11 @@ double AmpDacNOffsets[10];
 
 double AmpAdcSetPoints[] =     {-5.0,     -4.9,     -4.5,    -4.0,    -1.0,    -0.5,    -0.1,    -0.05,    -0.005,     -0.0000001,     0.0,     0.005,     0.05,    0.1,    0.5,    1.0,    4.0,    4.5,    4.9,     5.0};
 double AmpAdcOffsets[20];
-  
+
+// The fixed EEPROM offsets below (0/40/80/120/160) assume each cal table is a
+// 10-element double array of 40 bytes, i.e. 4-byte doubles (true on avr-gcc).
+static_assert(sizeof(double) == 4, "EEPROM cal layout assumes 4-byte double");
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Temp
 const uint8_t Temper1 = PIN_PC2;
@@ -144,7 +149,7 @@ void setup()
   dac.setReference(DAC_REFERENCE_ALWAYS_POWERED_UP);
   delay(10);
 
-  // Set all outputs to 1V
+  // Set all outputs to 0
   dac.writeChannel(DAC_CHANNEL_ALL, 0);
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -159,8 +164,10 @@ void setup()
   delay(1);
   
 
+  uint32_t adcBeginStart = millis();
   while (myADC.begin() == false)
   {
+    if (millis() - adcBeginStart > 2000) break;   // don't hang setup if the ADC is absent
   }
   delay(1);
   myADC.setVoltageReference(ADS1219_VREF_EXTERNAL);
@@ -196,6 +203,15 @@ void setup()
   EEPROM.get(80, AmpDacPOffsets);
   EEPROM.get(120, AmpDacNOffsets);
   EEPROM.get(160, AmpAdcOffsets);
+
+  // A fresh/erased EEPROM reads back as 0xFF -> NaN floats. Those would flow
+  // through the cal math and produce undefined DAC output, so fall back to
+  // zero offsets for any table that isn't finite.
+  ValidateCal(VoltDacOffsets, 10);
+  ValidateCal(VoltAdcOffsets, 10);
+  ValidateCal(AmpDacPOffsets, 10);
+  ValidateCal(AmpDacNOffsets, 10);
+  ValidateCal(AmpAdcOffsets, 20);
   //SetZero();
 }
 
@@ -393,12 +409,21 @@ void Zero(double * array, int size){
   }
 }
 
+void ValidateCal(double * array, int size){
+  for (int n = 0; n < size; n++){
+    if (isnan(array[n]) || isinf(array[n])){   // erased EEPROM / corrupt table
+      Zero(array, size);
+      return;
+    }
+  }
+}
+
 void SendArray(char prefix, double array[]){
   
   //Serial.print(prefix);
   for (uint8_t n = 0; n <= 9; n++){
     digitalWrite(DataOut1,LOW);
-    Serial.print('y');
+    Serial.print(prefix);
     Serial.print(array[n], 7);
     digitalWrite(DataOut1,HIGH);
   }
@@ -427,11 +452,13 @@ void ReadADCs(void)
   myADC.setInputMultiplexer(ADS1219_CONFIG_MUX_DIFF_P0_N1);
   if (myADC.startSync()) // Start a single-shot conversion. This will return true on success.
   {
+    uint32_t convStart = millis();
     while (myADC.dataReady() == false) // Check if the conversion is complete. This will return true if data is ready.
     {
+      if (millis() - convStart > 50) break; // bail out instead of hanging if the ADC stalls
       //delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
     }
-    
+
 
     myADC.readConversion(); // Read the conversion result from the ADC. Store it internally.
     float ADCreading = myADC.getConversionMillivolts(2500.0); // Convert to millivolts.
@@ -447,8 +474,10 @@ void ReadADCs(void)
   myADC.setInputMultiplexer(ADS1219_CONFIG_MUX_DIFF_P2_N3);
   if (myADC.startSync()) // Start a single-shot conversion. This will return true on success.
   {
+    uint32_t convStart = millis();
     while (myADC.dataReady() == false) // Check if the conversion is complete. This will return true if data is ready.
     {
+      if (millis() - convStart > 50) break; // bail out instead of hanging if the ADC stalls
       //delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
     }
 

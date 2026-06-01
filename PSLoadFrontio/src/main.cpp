@@ -8,6 +8,8 @@
   void processNumPad(float num);
   void FanContr(void);
   float checkKeys(void);
+  float readNumPad(void);
+  void processEncoder(void);
   void shaft_moved(void);
   float factorSelI(void);
   float factorSelV(void);
@@ -56,11 +58,13 @@
   bool aState;
   bool lastaState;
 
+  volatile int8_t encDelta = 0;   // signed detent count, written by the encoder ISR
+
   bool sendData = 0;
 
-  bool sendVolt = 0;
-  bool sendCurrP = 0;
-  bool sendCurrN = 0;
+  volatile bool sendVolt = 0;
+  volatile bool sendCurrP = 0;
+  volatile bool sendCurrN = 0;
 
   //------------------------------------------------------------------------------------------------
 
@@ -130,10 +134,9 @@ void setup()
 
 
   Timer3.initialize(1000);
-  Timer3.attachInterrupt(BuzzerISR); // blinkLED to run every 0.15 seconds
-  Timer3.stop();
-  Timer3.restart();
-  pinMode(Debug, BuzzerPin);
+  Timer3.attachInterrupt(BuzzerISR); // 1 ms tick; Buzzer() restarts it on demand
+  Timer3.stop();                     // keep stopped until the first Buzzer() call
+  pinMode(BuzzerPin, OUTPUT);
   digitalWrite(BuzzerPin, LOW);
 
 
@@ -213,10 +216,13 @@ void LoopPSload(){
 
   Ch1.initPSLoad();
 
+  encDelta = 0;                      //discard any encoder steps from cal/init
+
   while (mode == 0){                  //PSLoad normal mode
     if (Ch1.DataReady)  Ch1.GetData();           // ~6 us
     if (Ch1.DispData)   Ch1.dipsData();          //~4403 us
 
+    processEncoder();                            // apply any pending encoder steps
 
     if (sendVolt) {
       Ch1.dispSetData();
@@ -235,7 +241,7 @@ void LoopPSload(){
     }
 
     float keyreturn = checkKeys();                  //~ 1770 us  / or ~ 1 us
-    if (keyreturn != -1.0) Serial.println(keyreturn, 4);
+    if (!isnan(keyreturn)) Serial.println(keyreturn, 4);
     processNumPad(keyreturn);
 
 
@@ -293,59 +299,48 @@ float factorSelI(void){
 }
 
 void shaft_moved(){   //ISR
+  // Keep the ISR cheap: only decode direction and accumulate detents.
+  // The float math, clamping and beeping happen in processEncoder() (main loop).
   aState = digitalRead(RotClk);
-  
+
   last_run = !last_run;
   if(last_run == LOW){
-    if (digitalRead(RotDt) != aState)
-    {
-      if(ChannelSet == 0){                      //Set Ch1
-        if (SetType == 0){                      //Set Volts
-          Ch1.Vset = Ch1.Vset +  factorSelV();
-          sendVolt = 1;
-        }else if(SetType == 1){                 //Set I +
-          Ch1.Ipset = Ch1.Ipset + factorSelI();
-          sendCurrP = 1;
-        }else if(SetType == 2){                 //Set I +
-          Ch1.Inset = Ch1.Inset + factorSelI();
-          sendCurrN = 1;
-        }
-      }
-      if(ChannelSet == 1){                      //Set Ch2
+    if (digitalRead(RotDt) != aState)  encDelta++;
+    else                               encDelta--;
+  }
+}
 
-      }
+void processEncoder(){
+  if (encDelta == 0) return;
 
+  // Atomically grab and clear the pending step count.
+  noInterrupts();
+  int8_t steps = encDelta;
+  encDelta = 0;
+  interrupts();
 
-    }else{
-      if(ChannelSet == 0){                      //Set Ch1
-        if (SetType == 0){                      //Set Volts
-          Ch1.Vset = Ch1.Vset -  factorSelV();
-          sendVolt = 1;
-        }else if(SetType == 1){                 //Set I +
-          Ch1.Ipset = Ch1.Ipset - factorSelI();
-          sendCurrP = 1;
-        }else if(SetType == 2){                 //Set I +
-          Ch1.Inset = Ch1.Inset - factorSelI();
-          sendCurrN = 1;
-        }
-      }
-      if(ChannelSet == 1){                      //Set Ch2
-
-      }
+  if(ChannelSet == 0){                      //Set Ch1
+    if (SetType == 0){                      //Set Volts
+      Ch1.Vset = Ch1.Vset + steps * factorSelV();
+      Ch1.Vset = constrBeep(Ch1.Vset, 0.0, 25.0, 20);
+      sendVolt = 1;
+    }else if(SetType == 1){                 //Set I +
+      Ch1.Ipset = Ch1.Ipset + steps * factorSelI();
+      Ch1.Ipset = constrBeep(Ch1.Ipset, 0.0, 5.0, 20);
+      sendCurrP = 1;
+    }else if(SetType == 2){                 //Set I -
+      Ch1.Inset = Ch1.Inset + steps * factorSelI();
+      Ch1.Inset = constrBeep(Ch1.Inset, 0.0, 5.0, 20);
+      sendCurrN = 1;
     }
-    //Ch1.Vset = constrain(Ch1.Vset, 0.02, 25.0);
-    //Ch1.Ipset = constrain(Ch1.Ipset, 0.000001, 5.0);
-    //Ch1.Inset = constrain(Ch1.Inset, 0.000001, 5.0);
-
-    Ch1.Vset = constrBeep(Ch1.Vset, 0.0, 25.0, 20);
-    Ch1.Ipset = constrBeep(Ch1.Ipset, 0.0, 5.0, 20);
-    Ch1.Inset = constrBeep(Ch1.Inset, 0.0, 5.0, 20);
+  }
+  if(ChannelSet == 1){                      //Set Ch2
 
   }
 }
 
 float checkKeys(){      //~ 1770 us  / or ~ 1 us
-  float Return = -1.0;
+  float Return = NAN;
 
   const byte MAX_CHARS = 9;
   static char inputBuffer[MAX_CHARS];
@@ -362,15 +357,15 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
   //  Serial.println(key);
   //}
 
-  if (key == 0x00) return -1.0;
-  
+  if (key == 0x00) return NAN;
+
   switch (key){
     case 'H':
       factor++;
       factor = constrain(factor, 0, 4);
       //upDateUndLine = 1;
       Ch1.underLine();
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'G':
@@ -378,7 +373,7 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
       factor = constrain(factor, 0, 4);
       //upDateUndLine = 1;
       Ch1.underLine();
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'E':
@@ -386,41 +381,41 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
       if (Ch1.PwSet) Ch1.SendData('o');
       else Ch1.SendData('f');
       Serial.println("Power Toggle");
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'F':
-      Return = -1.0;               //PowerToggle Ch2
+      Return = NAN;               //PowerToggle Ch2
       break;
 
     case 'J':
       ChannelSet = 0;
       //upDateUndLine = 1;
       Ch1.underLine();
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'I':
       ChannelSet = 1;
       //upDateUndLine = 1;
       Ch1.underLine();
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'K':
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'L':
       Ch1.SendData('Y');
       Serial.println("Request Data");
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'M':
       // if (digitalRead(InterrSW) == 0) mode = 1;       // Enter Cal Function
       // Serial.println("why: ");
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'A':
@@ -428,7 +423,7 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
       // upDateUndLine = 1;
       Ch1.underLine();
       // Serial.println("A");
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'B':
@@ -436,7 +431,7 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
       // upDateUndLine = 1;
       Ch1.underLine();
       // Serial.println("B");
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'C':
@@ -444,14 +439,14 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
       // upDateUndLine = 1;
       Ch1.underLine();
       // Serial.println("C");
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case 'D':
       // Serial.println("D");
       // SendDataToCh1('q', DAC1m);
       // SendDataToCh1('w', DAC1b);
-      Return = -1.0;
+      Return = NAN;
       break;
 
     case '#': // user signal that entry has finished
@@ -472,11 +467,10 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
 
     default:
       if ((key >= '0' && key <= '9') || key == '.') { // only act on numeric or '.' keys
-        inputBuffer[inputIndex] = key;  // put the key value in the buffer
-        if (inputIndex != MAX_CHARS - 1) {
-          inputIndex++; // increment the array
+        if (inputIndex < MAX_CHARS - 1) {             // keep room for the '\0'
+          inputBuffer[inputIndex++] = key;            // store key, then advance
+          inputBuffer[inputIndex] = '\0';             // terminate the string
         }
-        inputBuffer[inputIndex] = '\0';  // terminate the string
 
         tft.setTextDatum(TR_DATUM);
         tft.setTextPadding(112);
@@ -485,7 +479,7 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
         // Serial.print("inputBuffer:  ");
         // Serial.println(inputBuffer);
 
-        Return = -1.0;
+        Return = NAN;
       }
       break;
   }
@@ -493,6 +487,43 @@ float checkKeys(){      //~ 1770 us  / or ~ 1 us
   
 
   return Return;
+}
+
+// Numeric-only entry used during calibration. Unlike checkKeys() it ignores the
+// command keys (power toggle, factor, channel, ...) so calibration can't trigger
+// those side effects. Returns NAN until '#' completes an entry.
+float readNumPad(){
+  const byte MAX_CHARS = 9;
+  static char inputBuffer[MAX_CHARS] = {0};
+  static uint8_t inputIndex = 0;
+
+  char key = keypad.getKey();
+  if (key == 0x00) return NAN;
+
+  if (key == '#') {                               // entry complete
+    float floatTotal = atof(inputBuffer);
+    inputIndex = 0;
+    inputBuffer[0] = '\0';
+
+    tft.setTextDatum(TR_DATUM);
+    tft.setTextPadding(112);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("", 150, 120, 4);
+    return floatTotal;
+  }
+
+  if ((key >= '0' && key <= '9') || key == '.') { // accumulate a number
+    if (inputIndex < MAX_CHARS - 1) {
+      inputBuffer[inputIndex++] = key;
+      inputBuffer[inputIndex] = '\0';
+    }
+    tft.setTextDatum(TR_DATUM);
+    tft.setTextPadding(112);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString(inputBuffer, 150, 120, 4);
+  }
+
+  return NAN;   // command keys are ignored during calibration
 }
 
 void FanContr(void){    //450 us      392 us    drawNum : 385 us
@@ -536,7 +567,7 @@ void FanContr(void){    //450 us      392 us    drawNum : 385 us
 }
 
 void processNumPad(float num){
-  if (num == -1.0) return;
+  if (isnan(num)) return;
   
   if(ChannelSet == 0){                      //Set Ch1
     if (SetType == 0){                      //Set Volts

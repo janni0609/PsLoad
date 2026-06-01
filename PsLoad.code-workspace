@@ -11,6 +11,10 @@
 		{
 			"name": "PsLoad (root)",
 			"path": "."
+		},
+		{
+			"name": "seeed studio esp test",
+			"path": "D:/GitHub/seeed studio esp test"
 		}
 	],
 	"settings": {}

@@ -30,8 +30,8 @@ public:
   float Inset = 1.0;
   bool PwSet = 0;
 
-  bool DataReady = 0;
-  bool DispData = 0;
+  volatile bool DataReady = 0;
+  volatile bool DispData = 0;
 
 
   float Volt, Amp, Watt, temp1, temp2;
@@ -79,15 +79,15 @@ public:
   }
 
   void SendArray(char prefix, double array[], uint16_t size){   //Serial Parameter
-  
-    //Serial1.print(prefix);
+
+    //serialPort->print(prefix);
     for (uint8_t n = 0; n < size; n++){
-      digitalWrite(DataOut1, HIGH);
-      Serial1.print(prefix);
-      Serial1.print(n);
-      Serial1.print(' ');
-      Serial1.print(array[n], 7);
-      digitalWrite(DataOut1, LOW);
+      digitalWrite(DataOut_1, HIGH);
+      serialPort->print(prefix);
+      serialPort->print(n);
+      serialPort->print(' ');
+      serialPort->print(array[n], 7);
+      digitalWrite(DataOut_1, LOW);
 
       Serial.print(array[n], 7);
       Serial.print("__");
@@ -276,7 +276,6 @@ public:
   }
 
   void underLine(){
-    myTime = micros();
     tft.fillRect(0, 176, 124, 4, TFT_BLACK);    //172
     tft.fillRect(0, 206, 124, 4, TFT_BLACK);
     tft.fillRect(0, 236, 124, 4, TFT_BLACK);
@@ -304,8 +303,6 @@ public:
       else if (factor == 3) tft.fillRect(70, 236, 12, 4, TFT_MAGENTA);
       else if (factor == 4) tft.fillRect(49, 236, 12, 4, TFT_MAGENTA);
     }
-    myTime = micros() - myTime;
-    Serial.println(myTime);
   }
 
   void CalMode(){   //Serial Parameter
@@ -385,8 +382,8 @@ public:
           }
           AvgCounter = 200;
           
-          double keyreturn = checkKeys();
-          if (keyreturn != -1.0){
+          double keyreturn = readNumPad();
+          if (!isnan(keyreturn)){
             AmpDacPOffsets[n] = AmpSetPoints[n] - keyreturn;
             AmpAdcOffsets[10+n] = keyreturn - CalAmp;
             Serial.print("ADC Meas: ");
@@ -433,8 +430,8 @@ public:
           }
           AvgCounter = 200;
           
-          double keyreturn = checkKeys();
-          if (keyreturn != -1.0){
+          double keyreturn = readNumPad();
+          if (!isnan(keyreturn)){
             AmpDacNOffsets[n] = AmpSetPoints[n] - keyreturn;
             AmpAdcOffsets[9-n] = keyreturn - CalAmp;
             Serial.print("ADC Meas: ");
@@ -509,8 +506,8 @@ public:
           }
           AvgCounter = 200;
           
-          double keyreturn = checkKeys();
-          if (keyreturn != -1.0){
+          double keyreturn = readNumPad();
+          if (!isnan(keyreturn)){
             VoltDacOffsets[n] = VoltSetPoints[n] - keyreturn;
             VoltAdcOffsets[n] = keyreturn - CalVolt;
             Serial.print("Offset DAC: ");
