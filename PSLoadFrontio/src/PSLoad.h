@@ -55,6 +55,7 @@ public:
   void init()
   {
     serialPort->begin(2000000);
+    serialPort->setTimeout(3);               // a corrupt/short packet must not stall parseFloat() for ~1s
 
     avgVolt->begin();
     avgAmp->begin();
@@ -82,6 +83,7 @@ public:
 
     //serialPort->print(prefix);
     for (uint8_t n = 0; n < size; n++){
+      feedWatchdog();
       digitalWrite(DataOut_1, HIGH);
       serialPort->print(prefix);
       serialPort->print(n);
@@ -101,6 +103,7 @@ public:
     DataReady = 0;
     //myTime = micros();
     while (serialPort->available() > 0){
+      feedWatchdog();
       //Serial.println("Get Data");
       char first = serialPort->read();
       if (first == 'V'){
@@ -319,6 +322,7 @@ public:
 
     //uint8_t n = 0;
     while(mode == 1){
+      feedWatchdog();
       char key = keypad.getKey();
       if (key == 'D'){
         mode = 0;
@@ -365,6 +369,7 @@ public:
       uint8_t AvgCounter = 0;
       uint8_t Check_n = n;
       while(Check_n == n){
+        feedWatchdog();
         //Serial.println("Ch1.DataReady: ");
         //Serial.println(Ch1.DataReady);
         if (DataReady)   GetData();
@@ -413,6 +418,7 @@ public:
       uint8_t AvgCounter = 0;
       uint8_t Check_n = n;
       while(Check_n == n){
+        feedWatchdog();
         //Serial.println("Ch1.DataReady: ");
         //Serial.println(Ch1.DataReady);
         if (DataReady)   GetData();
@@ -489,6 +495,7 @@ public:
       uint8_t AvgCounter = 0;
       uint8_t Check_n = n;
       while(Check_n == n){
+        feedWatchdog();
         //Serial.println("Ch1.DataReady: ");
         //Serial.println(Ch1.DataReady);
         if (DataReady)   GetData();

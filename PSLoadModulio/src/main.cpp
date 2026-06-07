@@ -15,6 +15,8 @@ void SendData();
 void ReadADCs();
 double Linear(double xValues[], double yValues[], int numValues, double pointX, bool trim);
 void SendDebug(float data);
+void RecoverADC();
+void AdcFault();
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -30,6 +32,10 @@ DAC dac(PIN_PA5, PIN_PA7, PIN_PA4, PIN_PA1, PIN_PA3);
 SfeADS1219ArdI2C myADC;
 const uint8_t ADCReset = PIN_PC5;
 //const uint8_t interruptPin = PIN_PC4;
+
+const uint8_t ADC_RECOVER_AT = 3;    // consecutive failed reads before attempting recovery
+const uint8_t ADC_FAIL_LIMIT = 20;   // consecutive failed reads before declaring a hard fault
+uint8_t adcFailCount = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //Timer Interrupt
@@ -134,6 +140,7 @@ void setup()
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   //Serial
   Serial.begin(2000000);                //th. max Bd 2500000
+  Serial.setTimeout(5);                 //a partial command must not block parseFloat()/parseInt() for ~1s
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Initialize the DAC
@@ -446,49 +453,100 @@ void SendDebug(float data){
   digitalWrite(DataOut1,HIGH);
 }
 
+// Reads one ADS1219 channel into mv (millivolts). Returns true ONLY if the
+// mux set, START/SYNC, DRDY poll and data read all succeed. On any I2C failure
+// it returns false so the caller leaves the previous value untouched and can
+// trigger recovery, instead of silently shipping a stale/garbage reading.
+static bool ReadAdcChannel(ads1219_input_multiplexer_config_t mux, float &mv)
+{
+  if (!myADC.setInputMultiplexer(mux)) return false;
+  if (!myADC.startSync()) return false;            // I2C write failed -> bus/chip down
+
+  uint32_t convStart = millis();
+  bool ready = false;
+  while (!(ready = myADC.dataReady()))             // wait for the conversion
+  {
+    if (millis() - convStart > 50) break;          // bail out instead of hanging if the ADC stalls
+  }
+  if (!ready) return false;                        // DRDY never asserted -> chip wedged
+
+  if (!myADC.readConversion()) return false;       // I2C read failed
+  mv = myADC.getConversionMillivolts(2500.0);      // Convert to millivolts.
+  return true;
+}
+
 void ReadADCs(void)
 {
+  bool ok = true;
+  float mv;
 
-  myADC.setInputMultiplexer(ADS1219_CONFIG_MUX_DIFF_P0_N1);
-  if (myADC.startSync()) // Start a single-shot conversion. This will return true on success.
+  if (ReadAdcChannel(ADS1219_CONFIG_MUX_DIFF_P0_N1, mv))   // Current
   {
-    uint32_t convStart = millis();
-    while (myADC.dataReady() == false) // Check if the conversion is complete. This will return true if data is ready.
-    {
-      if (millis() - convStart > 50) break; // bail out instead of hanging if the ADC stalls
-      //delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
-    }
-
-
-    myADC.readConversion(); // Read the conversion result from the ADC. Store it internally.
-    float ADCreading = myADC.getConversionMillivolts(2500.0); // Convert to millivolts.
-    ADCreading = 1250.0 - ADCreading;
+    float ADCreading = 1250.0 - mv;
     ADCreading = ADCreading * 4.0;
     Amps = ADCreading/1000.0;
     Amps += Linear(AmpAdcSetPoints, AmpAdcOffsets, 20, Amps, true);
     Amps = Amps - Volts / 110000.0;
-    //Serial.print("mAmps: ");
-    //Serial.print(ADCreading, 3);
   }
+  else ok = false;
 
-  myADC.setInputMultiplexer(ADS1219_CONFIG_MUX_DIFF_P2_N3);
-  if (myADC.startSync()) // Start a single-shot conversion. This will return true on success.
+  if (ReadAdcChannel(ADS1219_CONFIG_MUX_DIFF_P2_N3, mv))   // Voltage
   {
-    uint32_t convStart = millis();
-    while (myADC.dataReady() == false) // Check if the conversion is complete. This will return true if data is ready.
-    {
-      if (millis() - convStart > 50) break; // bail out instead of hanging if the ADC stalls
-      //delay(1); // The conversion is not complete. Wait a little to avoid pounding the I2C bus.
-    }
-
-    myADC.readConversion(); // Read the conversion result from the ADC. Store it internally.
-    float milliVolts = myADC.getConversionMillivolts(2500.0); // Convert to millivolts.
-    Volts = milliVolts/100.0;
+    Volts = mv/100.0;
     Volts += Linear(VoltSetPoints, VoltAdcOffsets, 10, double(Volts), true);
-    Volts = Volts;
-    //Serial.print("   Volt: ");
-    //Serial.print(milliVolts / 100.0, 6);
-  } 
+  }
+  else ok = false;
+
+  // ---- ADC health: recover on failure, declare a hard fault if it persists ----
+  if (ok)
+  {
+    if (adcFailCount > 0)                      // we were failing and just recovered
+    {
+      adcFailCount = 0;
+      if (!OTP_flag) digitalWrite(DataOut2, LOW);   // drop the error flag (unless OTP holds it)
+    }
+  }
+  else
+  {
+    if (adcFailCount < 255) adcFailCount++;
+    if (adcFailCount >= ADC_RECOVER_AT) RecoverADC();   // ride through one-off glitches first
+    if (adcFailCount >= ADC_FAIL_LIMIT) AdcFault();     // persistent -> FAULT + output off
+  }
+}
+
+// Bring a latched-up ADS1219 / I2C bus back to life.
+void RecoverADC(void)
+{
+  // PC5 ("ADCReset") is held HIGH during normal operation. Pulsing it LOW then
+  // HIGH releases an active-low reset or power-cycles an active-high enable -
+  // either way it restores a latched-up ADS1219, and it is harmless if it is
+  // neither (PC5 just returns to its normal HIGH state).
+  digitalWrite(ADCReset, LOW);
+  delay(2);
+  digitalWrite(ADCReset, HIGH);
+  delay(2);                       // >100us (tRSSTA) settle
+
+  // Re-init the I2C bus in case it latched up, then re-init the ADC.
+  Wire.end();
+  Wire.begin();
+  Wire.setClock(1000000);
+
+  if (myADC.begin())              // soft reset + verify the config register reads back 0
+  {
+    myADC.setVoltageReference(ADS1219_VREF_EXTERNAL);
+    myADC.setDataRate(ADS1219_DATA_RATE_330SPS);
+    myADC.setConversionMode(ADS1219_CONVERSION_SINGLE_SHOT);
+  }
+}
+
+// Persistent, unrecoverable sensor fault. Shut the output off so a frozen
+// reading can't mask a runaway condition, and raise the error flag to the Front
+// (buzzer). The output stays off until the user re-enables it.
+void AdcFault(void)
+{
+  digitalWrite(OnPhoto, LOW);
+  digitalWrite(ON, LOW);
+  digitalWrite(DataOut2, HIGH);
 }
 
 void SendData(void)

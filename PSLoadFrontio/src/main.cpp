@@ -16,6 +16,7 @@
   void Buzzer(uint32_t buzzMS);
   void BuzzerISR(void);
   float constrBeep(float num, float min, float max, uint32_t beep);
+  void feedWatchdog(void);
 
 
   #include "SPI.h"
@@ -27,6 +28,9 @@
 
 
   #include <InternalTemperature.h>
+
+  // Minimal IMXRT (Teensy 4) hardware watchdog using WDOG1 - no external library
+  // needed. Reboots the Front if the main loop ever hangs; feedWatchdog() services it.
 
 
   uint32_t myTime;
@@ -155,6 +159,7 @@ void setup()
   //Serial1.begin(1000000);
 
   Serial.begin(1000000);
+  Serial.setTimeout(5);          // don't let parseFloat() of a Pi command stall the UI for ~1s
 
   analogWriteFrequency(Fan, 25000);
 
@@ -193,6 +198,20 @@ void setup()
   //SprCh1.pushSprite(0,0);
 
   //------------------------------------------------------------------------------------------------
+  // Watchdog: reboots the Front if any loop hangs (e.g. a wedged serial parse).
+  // WT counts in 0.5 s steps, so WT(7) -> (7+1)*0.5 = 4 s timeout. The loop runs
+  // every <25 ms; the calibration / data loops also call feedWatchdog().
+  noInterrupts();
+  WDOG1_WCR = WDOG_WCR_WT(7) | WDOG_WCR_WDE | WDOG_WCR_SRS | WDOG_WCR_WDA;
+  WDOG1_WSR = 0x5555;           // service (refresh) sequence
+  WDOG1_WSR = 0xAAAA;
+  interrupts();
+  //------------------------------------------------------------------------------------------------
+}
+
+void feedWatchdog(void){
+  WDOG1_WSR = 0x5555;           // WDOG1 service (refresh) sequence: 0x5555 then 0xAAAA
+  WDOG1_WSR = 0xAAAA;
 }
 
 void BuzzerISR(void){   //ISR
@@ -219,6 +238,7 @@ void LoopPSload(){
   encDelta = 0;                      //discard any encoder steps from cal/init
 
   while (mode == 0){                  //PSLoad normal mode
+    feedWatchdog();
     if (Ch1.DataReady)  Ch1.GetData();           // ~6 us
     if (Ch1.DispData)   Ch1.dipsData();          //~4403 us
 
@@ -249,7 +269,7 @@ void LoopPSload(){
 
 
 
-    if (IoT.check()){                     //Gets Called every 1000 ms
+    if (IoT.check() && Serial.availableForWrite() > 64){   //every 1000 ms, only if USB TX has room (host may have stopped reading)
       Serial.print("Volt: ");             //Send Voltage, Current and Temperatur to Raspberry Pi
       Serial.print(Ch1.Volt,5);
       Serial.print("  Amp: ");
@@ -259,6 +279,7 @@ void LoopPSload(){
     }
 
     while (Serial.available() > 0){       //Recieve Data form Raspberry Pi
+      feedWatchdog();
       char first = Serial.read();
       if (first == 'V'){                  //Get set voltage Value
         Ch1.Vset = Serial.parseFloat();
@@ -587,6 +608,7 @@ void processNumPad(float num){
 }
 
 void loop() {
+  feedWatchdog();
   if (mode == 0) LoopPSload();
   if (mode == 1) Ch1.CalMode();
 
