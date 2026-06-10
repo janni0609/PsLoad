@@ -25,3 +25,28 @@ Hardware:
 
 USB C updi & uart --> switch			+				(#)
 
+
+
+Root cause
+Since the whole screen freezes (Fan%/temps too), the Front (Teensy) main loop is hanging, not just the Module's data going stale. The trigger is unbounded blocking in the Front's loop:
+
+GetData() calls Serial1.parseFloat() with the default 1000 ms timeout. The Module streams ~40 packets/s; the moment one packet is short/corrupt or the 64‑byte RX buffer overflows and desyncs, each parseFloat stalls up to 1 s. During that second ~1.6 KB more arrives → more overflow → more desync → it spirals and the UI is effectively frozen. The frozen ~0 V/5 A is just the last frame drawn before it locked up.
+A secondary path: the periodic USB Serial.print to the Pi blocks if the host stops reading.
+What I changed
+Front — stop the hang + guaranteed recovery (main.cpp, PSLoad.h):
+
+Serial1.setTimeout(3) and USB Serial.setTimeout(5) — a bad packet now costs milliseconds, not ~1 s, so the loop drains the buffer and re‑syncs instead of spiraling. This is the actual fix.
+Gated the 1 Hz USB print behind Serial.availableForWrite() > 64 so it can't block when the Pi isn't reading.
+Added the built‑in WDOG1 hardware watchdog (4 s), fed in loop() and every long‑running loop (data, calibration, SendArray). Any residual hang now auto‑reboots the Front. Used the core registers directly — no external library.
+Module — fix the underlying data fault + your safety choice (main.cpp):
+
+ReadADCs() now checks every I²C step. On failure it leaves the last value untouched (instead of shipping stale/garbage) and counts failures.
+After 3 consecutive failures → RecoverADC() (pulse the ADC reset pin, re‑init the I²C bus, re‑init + reconfigure the ADS1219).
+After 20 → AdcFault(): shuts the output off (ON/OnPhoto low) and raises the error flag → Front buzzer. Output stays off until you re‑enable it (your "FAULT + shut output off" choice).
+Serial.setTimeout(5) so a partial command can't stall the Module either.
+Build: both SUCCESS (Front Teensy 4.1, Module ATtiny3227). Flash with pio run -d PSLoadFrontio -t upload and pio run -d PSLoadModulio -t upload.
+
+Two things I couldn't verify on the bench (your call)
+ADCReset (PIN_PC5) — I assumed it's an active‑low reset or enable held HIGH, so RecoverADC() pulses it LOW→HIGH. If it's wired to something else the pulse is harmless (PC5 just returns HIGH) and the I²C/begin() re‑init still does the recovery — but confirm what PC5 actually drives so we know the hardware reset is real.
+The watchdog compiles and uses the standard IMXRT mechanism, but I can't confirm the reset fires on your board. Easy test: temporarily add an infinite while(1){} somewhere and confirm it reboots after ~4 s.
+Optional follow‑up: the fault currently signals via buzzer + output‑off, but the Front has no on‑screen "FAULT" text (a frozen value still looks like a reading). Want me to add a visible FAULT indicator on the Front when the Module raises the error line?
